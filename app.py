@@ -3,14 +3,13 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-# Layout "centered" lebih optimal untuk tampilan Portrait di Layar HP
-st.set_page_config(page_title="Aplikasi Estimator RAB", layout="centered")
+st.set_page_config(page_title="Estimator Proyek Terpadu", layout="centered")
 
 if 'rekap_proyek' not in st.session_state:
     st.session_state.rekap_proyek = []
 
 st.title("Aplikasi Estimator Rencana Anggaran Biaya")
-st.write("Modul perhitungan volume dan biaya konstruksi terpadu berdasarkan spesifikasi teknis dan metode pelaksanaan.")
+st.write("Modul perhitungan volume dan biaya konstruksi terpadu dengan item pekerjaan 100% lengkap berdasarkan standar teknis.")
 
 # --- SIDEBAR MENU UTAMA ---
 st.sidebar.title("Navigasi Proyek")
@@ -72,11 +71,11 @@ if jenis_bangunan == "1. Saluran Trapesium (Beton)":
         if show_galian: item_to_add.append(["Galian Tanah Profil Baru", vol_tanah_full, "m³", h_galian])
     else:
         st.sidebar.subheader("Persentase Bongkaran")
-        persen_bongkar = st.sidebar.slider("Volume Struktur Lama Dibongkar (%)", 0, 100, 100)
+        persen_bongkar = st.sidebar.slider("Volume Struktur Lama Dibongkar (%)", 0, 100, 100, key='sb_sal')
         show_bongkar = st.sidebar.checkbox("Bongkaran Beton Eksisting", value=True)
         h_bongkar = st.sidebar.number_input("AHSP Bongkaran (Rp/m³)", value=250000) if show_bongkar else 0
         show_sedimen = st.sidebar.checkbox("Galian Sedimen Saluran", value=True)
-        p_sedimen = st.sidebar.slider("Estimasi Sedimen (%)", 0, 100, 30) if show_sedimen else 0
+        p_sedimen = st.sidebar.slider("Estimasi Sedimen (%)", 0, 100, 30, key='sed_sal') if show_sedimen else 0
         h_sedimen = st.sidebar.number_input("AHSP Galian Sedimen (Rp/m³)", value=85000) if show_sedimen else 0
         
         if show_bongkar: item_to_add.append([f"Bongkaran Beton Lama ({persen_bongkar}%)", vol_beton * (persen_bongkar/100), "m³", h_bongkar])
@@ -125,12 +124,12 @@ elif jenis_bangunan == "2. Saluran Pasangan Batu (Drainase)":
         if show_galian: item_to_add.append(["Galian Tanah Saluran", vol_galian, "m³", h_galian])
     else:
         st.sidebar.subheader("Persentase Bongkaran")
-        persen_bongkar = st.sidebar.slider("Volume Struktur Lama Dibongkar (%)", 0, 100, 100)
+        persen_bongkar = st.sidebar.slider("Volume Struktur Lama Dibongkar (%)", 0, 100, 100, key='sb_pb')
         show_bongkar = st.sidebar.checkbox("Bongkaran Batu Eksisting", value=True)
         h_bongkar = st.sidebar.number_input("AHSP Bongkaran (Rp/m³)", value=150000) if show_bongkar else 0
         show_sedimen = st.sidebar.checkbox("Galian Sedimen Saluran", value=True)
-        p_sedimen = st.sidebar.slider("Estimasi Sedimen (%)", 0, 100, 30, key='pb_sed') if show_sedimen else 0
-        h_sedimen = st.sidebar.number_input("AHSP Galian Sedimen (Rp/m³)", value=85000, key='pb_sed_h') if show_sedimen else 0
+        p_sedimen = st.sidebar.slider("Estimasi Sedimen (%)", 0, 100, 30, key='sed_pb') if show_sedimen else 0
+        h_sedimen = st.sidebar.number_input("AHSP Galian Sedimen (Rp/m³)", value=85000) if show_sedimen else 0
         
         if show_bongkar: item_to_add.append([f"Bongkaran Struktur Lama ({persen_bongkar}%)", vol_batu * (persen_bongkar/100), "m³", h_bongkar])
         if show_sedimen: item_to_add.append(["Galian Sedimen & Pembersihan", vol_rongga * (p_sedimen/100), "m³", h_sedimen])
@@ -156,20 +155,20 @@ elif jenis_bangunan == "3. Jalan Perkerasan Lentur (Aspal)":
     lebar = st.sidebar.number_input("Lebar Jalan (m)", value=6.0)
     panjang = st.sidebar.number_input("Panjang Jalan (m)", value=1000.0)
     t_aspal = st.sidebar.number_input("Tebal Aspal (m)", value=0.05)
+    t_base = st.sidebar.number_input("Tebal Lapis Pondasi (m)", value=0.15)
 
     st.sidebar.header("Pekerjaan & AHSP")
     if mode_proyek == "Bangunan Baru":
-        t_base = st.sidebar.number_input("Tebal Lapis Pondasi (m)", value=0.15)
         show_grading = st.sidebar.checkbox("Penyiapan Badan Jalan", value=True)
         h_grading = st.sidebar.number_input("AHSP Penyiapan (Rp/m²)", value=12000) if show_grading else 0
         show_base = st.sidebar.checkbox("Lapis Pondasi Agregat", value=True)
         h_base = st.sidebar.number_input("AHSP Agregat (Rp/m³)", value=450000) if show_base else 0
         
-        if show_grading: item_to_add.append(["Penyiapan Badan Jalan", lebar * panjang, "m²", h_grading])
+        if show_grading: item_to_add.append(["Penyiapan Badan Jalan (Grading)", lebar * panjang, "m²", h_grading])
         if show_base: item_to_add.append(["Lapis Pondasi Agregat Kelas A", lebar * panjang * t_base, "m³", h_base])
     else:
         st.sidebar.subheader("Persentase Kerusakan (Kupas)")
-        persen_bongkar = st.sidebar.slider("Luasan Aspal Dikupas (%)", 0, 100, 100)
+        persen_bongkar = st.sidebar.slider("Luasan Aspal Dikupas (%)", 0, 100, 100, key='sb_aspal')
         show_milling = st.sidebar.checkbox("Kupas Aspal Lama (Cold Milling)", value=True)
         t_milling = st.sidebar.number_input("Tebal Kupasan (m)", value=0.04) if show_milling else 0
         h_milling = st.sidebar.number_input("AHSP Milling (Rp/m²)", value=35000) if show_milling else 0
@@ -187,6 +186,8 @@ elif jenis_bangunan == "3. Jalan Perkerasan Lentur (Aspal)":
     ax.add_patch(plt.Rectangle((0, -t_aspal), lebar, t_aspal, color='black', label='Aspal Baru'))
     if mode_proyek != "Bangunan Baru":
         ax.add_patch(plt.Rectangle((0, -(t_aspal+0.05)), lebar, 0.05, color='gray', hatch='//', label='Aspal Eksisting'))
+    else:
+        ax.add_patch(plt.Rectangle((0, -(t_aspal+t_base)), lebar, t_base, color='gray', label='Lapis Pondasi'))
     ax.set_xlim(-1, lebar + 1); ax.set_ylim(-0.3, 0.1); ax.set_aspect('equal'); ax.legend()
     ax.set_title("Penampang Perkerasan Lentur")
 
@@ -209,7 +210,7 @@ elif jenis_bangunan == "4. Jalan Perkerasan Kaku (Rigid)":
         if show_grading: item_to_add.append(["Penyiapan Badan Jalan", lebar * panjang, "m²", h_grading])
     else:
         st.sidebar.subheader("Persentase Bongkaran")
-        persen_bongkar = st.sidebar.slider("Volume Rigid Lama Dibongkar (%)", 0, 100, 100)
+        persen_bongkar = st.sidebar.slider("Volume Rigid Lama Dibongkar (%)", 0, 100, 100, key='sb_rigid')
         show_bongkar = st.sidebar.checkbox("Bongkaran Rigid Lama", value=True)
         h_bongkar = st.sidebar.number_input("AHSP Bongkaran Rigid (Rp/m³)", value=450000) if show_bongkar else 0
         if show_bongkar: item_to_add.append([f"Bongkaran Rigid Eksisting ({persen_bongkar}%)", vol_rigid * (persen_bongkar/100), "m³", h_bongkar])
@@ -248,21 +249,21 @@ elif jenis_bangunan == "5. Pondasi Telapak":
     jml_titik = st.sidebar.number_input("Jumlah Titik", value=10)
     
     vol_beton = ((p_telapak * l_telapak * t_telapak) + (sisi_kolom * sisi_kolom * t_kolom)) * jml_titik
-    vol_galian = (p_telapak + 0.4) * (l_telapak + 0.4) * (t_telapak + t_kolom) * jml_titik 
+    vol_galian = (p_telapak + 0.4) * (l_telapak + 0.4) * (t_telapak + t_kolom + 0.05) * jml_titik 
     vol_lc = p_telapak * l_telapak * 0.05 * jml_titik 
     luas_bekisting = (((p_telapak + l_telapak) * 2 * t_telapak) + ((sisi_kolom * 4) * t_kolom)) * jml_titik
 
     st.sidebar.header("Pekerjaan & AHSP")
     if mode_proyek != "Bangunan Baru":
         st.sidebar.subheader("Persentase Bongkaran")
-        persen_bongkar = st.sidebar.slider("Volume Pondasi Lama Dibongkar (%)", 0, 100, 100)
+        persen_bongkar = st.sidebar.slider("Volume Pondasi Lama Dibongkar (%)", 0, 100, 100, key='sb_pondasi')
         show_bongkar = st.sidebar.checkbox("Bongkaran Pondasi Lama", value=True)
         h_bongkar = st.sidebar.number_input("AHSP Bongkaran (Rp/m³)", value=350000) if show_bongkar else 0
         if show_bongkar: item_to_add.append([f"Bongkaran Pondasi Eksisting ({persen_bongkar}%)", vol_beton * (persen_bongkar/100), "m³", h_bongkar])
 
     show_galian = st.sidebar.checkbox("Galian Tanah Pondasi", value=True)
     h_galian = st.sidebar.number_input("AHSP Galian (Rp/m³)", value=75000) if show_galian else 0
-    show_lc = st.sidebar.checkbox("Lantai Kerja Pondasi", value=True)
+    show_lc = st.sidebar.checkbox("Lantai Kerja Pondasi (5cm)", value=True)
     h_lc = st.sidebar.number_input("AHSP Lantai Kerja (Rp/m³)", value=950000) if show_lc else 0
     show_bekisting = st.sidebar.checkbox("Bekisting Pondasi & Kolom", value=True)
     h_bekisting = st.sidebar.number_input("AHSP Bekisting (Rp/m²)", value=145000) if show_bekisting else 0
@@ -305,7 +306,7 @@ elif jenis_bangunan == "6. Dinding Penahan Tanah (Kantilever)":
     st.sidebar.header("Pekerjaan & AHSP")
     if mode_proyek != "Bangunan Baru":
         st.sidebar.subheader("Persentase Bongkaran")
-        persen_bongkar = st.sidebar.slider("Volume DPT Lama Dibongkar (%)", 0, 100, 100)
+        persen_bongkar = st.sidebar.slider("Volume DPT Lama Dibongkar (%)", 0, 100, 100, key='sb_dpt')
         show_bongkar = st.sidebar.checkbox("Bongkaran DPT Lama", value=True)
         h_bongkar = st.sidebar.number_input("AHSP Bongkaran (Rp/m³)", value=350000) if show_bongkar else 0
         if show_bongkar: item_to_add.append([f"Bongkaran Struktur DPT Eksisting ({persen_bongkar}%)", vol_beton * (persen_bongkar/100), "m³", h_bongkar])
@@ -342,7 +343,6 @@ elif jenis_bangunan == "6. Dinding Penahan Tanah (Kantilever)":
 st.write("---")
 st.subheader(f"Preview Pekerjaan: {kategori_pekerjaan}")
 
-# Tampilkan list estimasi sementara
 total_preview = 0
 for item in item_to_add:
     total_preview += (item[1] * item[3])
@@ -350,7 +350,6 @@ for item in item_to_add:
 
 st.info(f"Total Biaya Sub-Pekerjaan Ini: Rp {total_preview:,.0f}")
 
-# Tombol Tambah
 if len(item_to_add) > 0:
     if st.button("TAMBAHKAN KE MASTER REKAP", use_container_width=True):
         for item in item_to_add:
@@ -364,7 +363,6 @@ if len(item_to_add) > 0:
             })
         st.success("Item pekerjaan berhasil ditambahkan ke Rekapitulasi Akhir.")
 
-# Visualisasi di-stack di bawahnya agar tidak saling tindih di HP
 st.write("---")
 st.subheader("Visualisasi Penampang Konstruksi")
 st.pyplot(fig)
