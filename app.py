@@ -381,29 +381,25 @@ if st.session_state.rekap_proyek:
         idx_edit = int(pilihan_edit.split(".")[0]) - 1
         item_terpilih = st.session_state.rekap_proyek[idx_edit]
         
-        # Tampilkan data awal yang terekap
-        st.sidebar.info(f"**Data Saat Ini:**\n- Volume Awal: {item_terpilih['Volume']} {item_terpilih['Satuan']}\n- AHSP Awal: Rp {item_terpilih['AHSP']:,.0f}")
+        st.sidebar.info(f"**Data Saat Ini:**\n- Volume: {item_terpilih['Volume']} {item_terpilih['Satuan']}\n- AHSP: Rp {item_terpilih['AHSP']:,.0f}")
         
-        # Slider persentase perubahan volume
-        persen_adj = st.sidebar.slider("Persentase Penyesuaian Volume (%)", 0, 200, 100, step=1, key="edit_adj")
+        persen_adj = st.sidebar.slider("Persentase Penyesuaian Volume (%)", 0, 200, 100, step=1, key=f"adj_{idx_edit}")
         vol_hitung = float(item_terpilih['Volume']) * (persen_adj / 100.0)
         
-        # Input yang otomatis terupdate berdasarkan slider (tapi tetap bisa diketik manual)
-        val_vol = st.sidebar.number_input(f"Edit Volume Akhir ({item_terpilih['Satuan']})", value=float(vol_hitung), key="edit_vol")
-        val_ahsp = st.sidebar.number_input("Edit AHSP Akhir (Rp)", value=float(item_terpilih['AHSP']), key="edit_ahsp")
+        # KEY DINAMIS agar input number_input berubah saat slider digeser
+        val_vol = st.sidebar.number_input(f"Edit Volume Akhir ({item_terpilih['Satuan']})", value=float(vol_hitung), key=f"edit_vol_{idx_edit}_{persen_adj}")
+        val_ahsp = st.sidebar.number_input("Edit AHSP Akhir (Rp)", value=float(item_terpilih['AHSP']), key=f"edit_ahsp_{idx_edit}")
         
         col_e1, col_e2 = st.sidebar.columns(2)
         with col_e1:
-            if st.button("💾 Update Data", key="btn_update"):
+            if st.button("💾 Update Data", key=f"btn_upd_{idx_edit}"):
                 st.session_state.rekap_proyek[idx_edit]['Volume'] = val_vol
                 st.session_state.rekap_proyek[idx_edit]['AHSP'] = val_ahsp
                 st.session_state.rekap_proyek[idx_edit]['Total'] = val_vol * val_ahsp
-                st.success("Data Diperbarui!")
                 st.rerun()
         with col_e2:
-            if st.button("🗑️ Hapus Item", key="btn_hapus"):
+            if st.button("🗑️ Hapus Item", key=f"btn_del_{idx_edit}"):
                 st.session_state.rekap_proyek.pop(idx_edit)
-                st.success("Data Dihapus!")
                 st.rerun()
 
 # =====================================================================
