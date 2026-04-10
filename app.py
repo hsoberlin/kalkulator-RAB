@@ -18,7 +18,7 @@ st.sidebar.title("Navigasi Proyek")
 jenis_bangunan = st.sidebar.selectbox(
     "Pilih Jenis Pekerjaan:",
     [
-        "0. Pekerjaan Persiapan (Divisi 1)",
+        "0. Pekerjaan Persiapan",
         "1. Saluran Trapesium (Beton)", 
         "2. Saluran Pasangan Batu (Drainase)",
         "3. Jalan Perkerasan Lentur (Aspal)", 
@@ -53,9 +53,9 @@ item_to_add = []
 kategori_pekerjaan = jenis_bangunan 
 
 # =====================================================================
-# 0. PEKERJAAN PERSIAPAN (DIVISI 1)
+# 0. PEKERJAAN PERSIAPAN
 # =====================================================================
-if jenis_bangunan == "0. Pekerjaan Persiapan (Divisi 1)":
+if jenis_bangunan == "0. Pekerjaan Persiapan":
     st.sidebar.header("Item Persiapan (Lump Sum)")
     
     show_survey = st.sidebar.checkbox("Survey, Pengukuran & Pasang Bowplank", value=True, key="0_cb_surv")
@@ -76,7 +76,7 @@ if jenis_bangunan == "0. Pekerjaan Persiapan (Divisi 1)":
     if show_direksi: item_to_add.append(["Fasilitas Proyek/Direksi Keet", 1.0, "LS", h_direksi])
 
     fig, ax = plt.subplots()
-    ax.text(0.5, 0.5, 'Divisi 1:\nPekerjaan Persiapan & Umum\n(Non-Struktural)', horizontalalignment='center', verticalalignment='center', fontsize=14, fontweight='bold', color='gray')
+    ax.text(0.5, 0.5, 'Pekerjaan Persiapan & Umum\n(Non-Struktural)', horizontalalignment='center', verticalalignment='center', fontsize=14, fontweight='bold', color='gray')
     ax.set_axis_off()
 
 # =====================================================================
@@ -360,39 +360,6 @@ elif jenis_bangunan == "7. Pondasi Bore Pile":
     ax.add_patch(plt.Rectangle((-1, -kedalaman), 2, kedalaman, color='saddlebrown', alpha=0.1))
     ax.add_patch(plt.Rectangle((-diameter/2, -kedalaman), diameter, kedalaman, color='gray'))
     ax.set_xlim(-1, 1); ax.set_ylim(-kedalaman-1, 1); ax.set_aspect('equal')
-
-# =====================================================================
-# EDIT / HAPUS ITEM (DI SIDEBAR KIRI BAWAH)
-# =====================================================================
-if st.session_state.rekap_proyek:
-    st.sidebar.divider()
-    st.sidebar.header("✏️ Edit/Hapus Item Tersimpan")
-    st.sidebar.write("Pilih item dari Laporan RAB untuk mengubah Volume atau AHSP.")
-    
-    # Buat label pilihan yang mudah dikenali
-    opsi_edit = [f"{i}. {item['Pekerjaan']} ({item['Kategori'].split('.')[0]})" for i, item in enumerate(st.session_state.rekap_proyek)]
-    pilihan_edit = st.sidebar.selectbox("Pilih Item:", opsi_edit, key="select_edit")
-    
-    if pilihan_edit:
-        idx_edit = int(pilihan_edit.split(".")[0])
-        item_terpilih = st.session_state.rekap_proyek[idx_edit]
-        
-        val_vol = st.sidebar.number_input(f"Edit Volume ({item_terpilih['Satuan']})", value=float(item_terpilih['Volume']), key="edit_vol")
-        val_ahsp = st.sidebar.number_input("Edit AHSP (Rp)", value=float(item_terpilih['AHSP']), key="edit_ahsp")
-        
-        col_e1, col_e2 = st.sidebar.columns(2)
-        with col_e1:
-            if st.button("💾 Update", key="btn_update"):
-                st.session_state.rekap_proyek[idx_edit]['Volume'] = val_vol
-                st.session_state.rekap_proyek[idx_edit]['AHSP'] = val_ahsp
-                st.session_state.rekap_proyek[idx_edit]['Total'] = val_vol * val_ahsp
-                st.success("Diperbarui!")
-                st.rerun()
-        with col_e2:
-            if st.button("🗑️ Hapus", key="btn_hapus"):
-                st.session_state.rekap_proyek.pop(idx_edit)
-                st.success("Dihapus!")
-                st.rerun()
 
 # =====================================================================
 # TAMPILAN PREVIEW & REKAP (PORTRAIT HP)
