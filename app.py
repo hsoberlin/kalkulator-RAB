@@ -188,11 +188,12 @@ elif jenis_bangunan == "3. Jalan Perkerasan Lentur (Aspal)":
         if show_grading: item_to_add.append(["Penyiapan Badan Jalan", lebar * panjang, "m²", h_grading])
         if show_base: item_to_add.append(["Lapis Pondasi Agregat A", lebar * panjang * t_base, "m³", h_base])
     else:
+        p_bongkar = st.sidebar.slider("Persen Area Dikupas (%)", 0, 100, 100, key="3_sl_bongk")
         show_milling = st.sidebar.checkbox("Cold Milling (Kupas Aspal)", value=True, key="3_cb_mill")
         h_milling = st.sidebar.number_input("AHSP Milling (Rp/m³)", value=350000, key="3_h_mill") if show_milling else 0
         show_tack = st.sidebar.checkbox("Lapis Perekat (Tack Coat)", value=True, key="3_cb_tack")
         h_tack = st.sidebar.number_input("AHSP Tack Coat (Rp/Liter)", value=15000, key="3_h_tack") if show_tack else 0
-        if show_milling: item_to_add.append(["Cold Milling (Kupas Aspal)", lebar * panjang * t_aspal, "m³", h_milling])
+        if show_milling: item_to_add.append([f"Cold Milling Kupas Aspal ({p_bongkar}%)", (lebar * panjang * t_aspal) * (p_bongkar/100), "m³", h_milling])
         if show_tack: item_to_add.append(["Lapis Perekat (Tack Coat)", lebar * panjang * 0.35, "Liter", h_tack])
 
     show_aspal = st.sidebar.checkbox("Aspal Hotmix AC-WC", value=True, key="3_cb_asp")
@@ -257,9 +258,10 @@ elif jenis_bangunan == "5. Pondasi Telapak":
 
     st.sidebar.header("Pekerjaan & AHSP")
     if mode_proyek != "Bangunan Baru":
+        p_bongkar = st.sidebar.slider("Persen Bongkaran (%)", 0, 100, 100, key="5_sl_bongk")
         show_bongkar = st.sidebar.checkbox("Bongkaran Struktur Lama", value=True, key="5_cb_bongk")
         h_bongkar = st.sidebar.number_input("AHSP Bongkaran (Rp/m³)", value=350000, key="5_h_bongk") if show_bongkar else 0
-        if show_bongkar: item_to_add.append(["Bongkaran Struktur Lama", vol_beton, "m³", h_bongkar])
+        if show_bongkar: item_to_add.append([f"Bongkaran Struktur Lama ({p_bongkar}%)", vol_beton * (p_bongkar/100), "m³", h_bongkar])
 
     show_galian = st.sidebar.checkbox("Galian Tanah Pondasi", value=True, key="5_cb_gal")
     h_galian = st.sidebar.number_input("AHSP Galian (Rp/m³)", value=75000, key="5_h_gal") if show_galian else 0
@@ -295,9 +297,10 @@ elif jenis_bangunan == "6. Dinding Penahan Tanah (Kantilever)":
 
     st.sidebar.header("Pekerjaan & AHSP")
     if mode_proyek != "Bangunan Baru":
+        p_bongkar = st.sidebar.slider("Persen Bongkaran (%)", 0, 100, 100, key="6_sl_bongk")
         show_bongkar = st.sidebar.checkbox("Bongkaran DPT Eksisting", value=True, key="6_cb_bongk")
         h_bongkar = st.sidebar.number_input("AHSP Bongkaran (Rp/m³)", value=350000, key="6_h_bongk") if show_bongkar else 0
-        if show_bongkar: item_to_add.append(["Bongkaran DPT Eksisting", vol_beton, "m³", h_bongkar])
+        if show_bongkar: item_to_add.append([f"Bongkaran DPT Eksisting ({p_bongkar}%)", vol_beton * (p_bongkar/100), "m³", h_bongkar])
 
     show_galian = st.sidebar.checkbox("Galian Struktur DPT", value=True, key="6_cb_gal")
     h_galian = st.sidebar.number_input("AHSP Galian (Rp/m³)", value=75000, key="6_h_gal") if show_galian else 0
@@ -337,9 +340,10 @@ elif jenis_bangunan == "7. Pondasi Bore Pile":
 
     st.sidebar.header("Pekerjaan & AHSP")
     if mode_proyek == "Rehabilitasi Struktur":
+        p_bongkar = st.sidebar.slider("Persen Titik Dibongkar (%)", 0, 100, 100, key="7_sl_bongk")
         show_bongkar = st.sidebar.checkbox("Pembersihan Lokasi/Bongkar Kepala", value=True, key="7_cb_bongk")
         h_bongkar = st.sidebar.number_input("AHSP Pembersihan (Rp/Titik)", value=500000, key="7_h_bongk") if show_bongkar else 0
-        if show_bongkar: item_to_add.append(["Pembersihan Lokasi/Bongkar Kepala Pile", jml_titik, "Titik", h_bongkar])
+        if show_bongkar: item_to_add.append([f"Pembersihan Lokasi/Bongkar Kepala ({p_bongkar}%)", jml_titik * (p_bongkar/100), "Titik", h_bongkar])
 
     show_bor = st.sidebar.checkbox("Pengeboran Bore Pile", value=True, key="7_cb_bor")
     h_bor = st.sidebar.number_input("AHSP Pengeboran (Rp/m³)", value=450000, key="7_h_bor") if show_bor else 0
