@@ -365,6 +365,40 @@ elif jenis_bangunan == "7. Pondasi Bore Pile":
     ax.set_xlim(-1, 1); ax.set_ylim(-kedalaman-1, 1); ax.set_aspect('equal')
 
 # =====================================================================
+# EDIT / HAPUS ITEM (DI SIDEBAR KIRI BAWAH)
+# =====================================================================
+if st.session_state.rekap_proyek:
+    st.sidebar.divider()
+    st.sidebar.header("✏️ Edit Item Tersimpan")
+    st.sidebar.write("Pilih item di bawah ini untuk mengubah Volume atau AHSP-nya:")
+    
+    # Tambahkan opsi default agar tidak langsung merender edit form pertama kali
+    opsi_edit = [f"{i+1}. {item['Pekerjaan']} ({item['Kategori'].split('.')[0]})" for i, item in enumerate(st.session_state.rekap_proyek)]
+    pilihan_edit = st.sidebar.selectbox("Pilih Item:", ["-- Pilih Item --"] + opsi_edit, key="select_edit")
+    
+    if pilihan_edit != "-- Pilih Item --":
+        # Kurangi 1 karena indeks python dimulai dari 0
+        idx_edit = int(pilihan_edit.split(".")[0]) - 1
+        item_terpilih = st.session_state.rekap_proyek[idx_edit]
+        
+        val_vol = st.sidebar.number_input(f"Ubah Volume ({item_terpilih['Satuan']})", value=float(item_terpilih['Volume']), key="edit_vol")
+        val_ahsp = st.sidebar.number_input("Ubah AHSP (Rp)", value=float(item_terpilih['AHSP']), key="edit_ahsp")
+        
+        col_e1, col_e2 = st.sidebar.columns(2)
+        with col_e1:
+            if st.button("💾 Update Data", key="btn_update"):
+                st.session_state.rekap_proyek[idx_edit]['Volume'] = val_vol
+                st.session_state.rekap_proyek[idx_edit]['AHSP'] = val_ahsp
+                st.session_state.rekap_proyek[idx_edit]['Total'] = val_vol * val_ahsp
+                st.success("Data Diperbarui!")
+                st.rerun()
+        with col_e2:
+            if st.button("🗑️ Hapus Item", key="btn_hapus"):
+                st.session_state.rekap_proyek.pop(idx_edit)
+                st.success("Data Dihapus!")
+                st.rerun()
+
+# =====================================================================
 # TAMPILAN PREVIEW & REKAP (PORTRAIT HP)
 # =====================================================================
 st.write("---")
@@ -393,35 +427,13 @@ st.write("---")
 st.pyplot(fig)
 
 # =====================================================================
-# MASTER RAB FINAL & FITUR EDIT DATA (TANPA EXCEL EXPORT)
+# MASTER RAB FINAL (MURNI LAPORAN)
 # =====================================================================
 st.divider()
 st.header("Laporan Rencana Anggaran Biaya (RAB)")
 
 if st.session_state.rekap_proyek:
-    
-    # --- FITUR EDIT ---
-    with st.expander("✏️ Manajemen Data (Edit & Hapus Item)"):
-        st.info("Edit kolom **Pekerjaan, Volume, atau AHSP**. Untuk menghapus item, centang kotak di sebelah kiri baris, lalu tekan icon `Delete` (tong sampah) di pojok kanan atas tabel ini.")
-        df_raw = pd.DataFrame(st.session_state.rekap_proyek)
-        edited_df = st.data_editor(
-            df_raw,
-            column_config={
-                "Kategori": st.column_config.Column(disabled=True),
-                "Total": st.column_config.Column(disabled=True)
-            },
-            num_rows="dynamic",
-            use_container_width=True,
-            key="editor_tabel"
-        )
-        
-        if st.button("💾 Simpan Perubahan Data"):
-            edited_df["Total"] = edited_df["Volume"] * edited_df["AHSP"]
-            st.session_state.rekap_proyek = edited_df.to_dict('records')
-            st.success("Data berhasil diperbarui!")
-            st.rerun()
-
-    # --- TAMPILAN TABEL RAB ---
+    # --- TAMPILAN TABEL RAB (HANYA DISPLAY) ---
     df = pd.DataFrame(st.session_state.rekap_proyek).sort_values(by="Kategori")
     display_data = []
     biaya_langsung = 0
@@ -434,23 +446,38 @@ if st.session_state.rekap_proyek:
         nama_kat_bersih = kat.split(". ")[1] if ". " in kat else kat
 
         for _, row in df_kat.iterrows():
-            display_data.append({"Uraian Pekerjaan": row['Pekerjaan'], "Volume": f"{row['Volume']} {row['Satuan']}", "Harga Satuan": f"Rp {row['AHSP']:,.0f}", "Jumlah Harga": f"Rp {row['Total']:,.0f}"})
-        display_data.append({"Uraian Pekerjaan": f"SUB-TOTAL {nama_kat_bersih.upper()}", "Volume": "", "Harga Satuan": "", "Jumlah Harga": f"Rp {sub:,.0f}"})
-        display_data.append({"Uraian Pekerjaan": "", "Volume": "", "Harga Satuan": "", "Jumlah Harga": ""})
+            display_data.append({
+                "Uraian Pekerjaan": row['Pekerjaan'], 
+                "Volume": f"{row['Volume']} {row['Satuan']}", 
+                "Harga Satuan": f"Rp {row['AHSP']:,.0f}", 
+                "Jumlah Harga": f"Rp {row['Total']:,.0f}"
+            })
+        display_data.append({
+            "Uraian Pekerjaan": f"SUB-TOTAL {nama_kat_bersih.upper()}", 
+            "Volume": "", "Harga Satuan": "", "Jumlah Harga": f"Rp {sub:,.0f}"
+        })
+        display_data.append({
+            "Uraian Pekerjaan": "", "Volume": "", "Harga Satuan": "", "Jumlah Harga": ""
+        })
 
     oh = biaya_langsung * (overhead_pct/100)
     ppn = (biaya_langsung + oh) * (ppn_pct/100)
     total_akhir = biaya_langsung + oh + ppn
 
-    display_data.append({"Uraian Pekerjaan": "========================================", "Volume": "", "Harga Satuan": "", "Jumlah Harga": ""})
-    display_data.append({"Uraian Pekerjaan": "A. TOTAL BIAYA LANGSUNG", "Volume": "", "Harga Satuan": "", "Jumlah Harga": f"Rp {biaya_langsung:,.0f}"})
-    display_data.append({"Uraian Pekerjaan": f"B. OVERHEAD & PROFIT ({overhead_pct}%)", "Volume": "", "Harga Satuan": "", "Jumlah Harga": f"Rp {oh:,.0f}"})
-    display_data.append({"Uraian Pekerjaan": "C. TOTAL (A + B)", "Volume": "", "Harga Satuan": "", "Jumlah Harga": f"Rp {biaya_langsung + oh:,.0f}"})
-    display_data.append({"Uraian Pekerjaan": f"D. PPN / PAJAK ({ppn_pct}%)", "Volume": "", "Harga Satuan": "", "Jumlah Harga": f"Rp {ppn:,.0f}"})
-    display_data.append({"Uraian Pekerjaan": "GRAND TOTAL KONTRAK", "Volume": "", "Harga Satuan": "", "Jumlah Harga": f"Rp {total_akhir:,.0f}"})
+    # Data tambahan untuk Export Excel
+    export_data = display_data.copy()
+    export_data.append({"Uraian Pekerjaan": "========================================", "Volume": "", "Harga Satuan": "", "Jumlah Harga": ""})
+    export_data.append({"Uraian Pekerjaan": "A. TOTAL BIAYA LANGSUNG", "Volume": "", "Harga Satuan": "", "Jumlah Harga": f"Rp {biaya_langsung:,.0f}"})
+    export_data.append({"Uraian Pekerjaan": f"B. OVERHEAD & PROFIT ({overhead_pct}%)", "Volume": "", "Harga Satuan": "", "Jumlah Harga": f"Rp {oh:,.0f}"})
+    export_data.append({"Uraian Pekerjaan": "C. TOTAL (A + B)", "Volume": "", "Harga Satuan": "", "Jumlah Harga": f"Rp {biaya_langsung + oh:,.0f}"})
+    export_data.append({"Uraian Pekerjaan": f"D. PPN / PAJAK ({ppn_pct}%)", "Volume": "", "Harga Satuan": "", "Jumlah Harga": f"Rp {ppn:,.0f}"})
+    export_data.append({"Uraian Pekerjaan": "GRAND TOTAL KONTRAK", "Volume": "", "Harga Satuan": "", "Jumlah Harga": f"Rp {total_akhir:,.0f}"})
 
-    st.dataframe(pd.DataFrame(display_data), use_container_width=True)
+    df_export = pd.DataFrame(export_data)
     
+    # Tampilkan di Streamlit
+    st.dataframe(df_export, use_container_width=True)
+
     st.write("---")
     if st.button("🗑️ Kosongkan Master Rekap", use_container_width=True):
         st.session_state.rekap_proyek = []
