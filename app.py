@@ -32,10 +32,16 @@ item_to_add = []
 kategori_pekerjaan = jenis_bangunan.split(". ")[1]
 
 # =====================================================================
-# 1. LOGIKA SALURAN TRAPESIUM (BETON) - KETEBALAN DINAMIS
+# 1. LOGIKA SALURAN TRAPESIUM (BETON) - KETEBALAN DINAMIS & METODE
 # =====================================================================
 if jenis_bangunan == "1. Saluran Trapesium (Beton)":
-    st.sidebar.header("📐 Dimensi Saluran")
+    st.sidebar.header("🚜 Metode Pelaksanaan")
+    mode_saluran = st.sidebar.radio(
+        "Kondisi Lahan Awal:",
+        ["Saluran Baru (Tanah Asli)", "Rehabilitasi (Bongkar Saluran Lama)"]
+    )
+
+    st.sidebar.header("📐 Dimensi Saluran Baru")
     lebar_atas = st.sidebar.number_input("Lebar Dalam Atas (m)", value=1.2)
     lebar_bawah = st.sidebar.number_input("Lebar Dalam Bawah (m)", value=0.8)
     tinggi = st.sidebar.number_input("Tinggi Saluran (m)", value=5.0)
@@ -46,62 +52,74 @@ if jenis_bangunan == "1. Saluran Trapesium (Beton)":
     t_bawah = st.sidebar.number_input("Tebal Dinding Bawah (m)", value=0.25)
     t_dasar = st.sidebar.number_input("Tebal Pelat Dasar (m)", value=0.30)
 
-    st.sidebar.header("🛠️ Pilih Pekerjaan & AHSP")
-    show_galian = st.sidebar.checkbox("Galian Tanah (Sesuai Profil Luar)", value=True)
-    h_galian = st.sidebar.number_input("AHSP Galian (Rp/m³)", value=75000, step=5000) if show_galian else 0
-    
-    show_cor = st.sidebar.checkbox("Pengecoran Beton Dinding & Dasar", value=True)
-    h_cor = st.sidebar.number_input("AHSP Cor (Rp/m³)", value=1200000, step=50000) if show_cor else 0
-
-    # Perhitungan Volume
+    # Perhitungan Geometri Dasar
     dist_dalam = (lebar_atas - lebar_bawah) / 2
     sisi_miring = np.sqrt(dist_dalam**2 + tinggi**2)
     
-    # Luas penampang beton = (2 x luas trapesium dinding) + luas persegi panjang dasar
     luas_dinding_satu_sisi = sisi_miring * ((t_atas + t_bawah) / 2)
     luas_dasar = lebar_bawah * t_dasar
     vol_beton = ((2 * luas_dinding_satu_sisi) + luas_dasar) * panjang
     
-    # Galian tanah dihitung dari dimensi TERLUAR beton
     l_luar_atas = lebar_atas + (2 * t_atas)
     l_luar_bawah = lebar_bawah + (2 * t_bawah)
-    vol_tanah = (((l_luar_atas + l_luar_bawah) / 2) * (tinggi + t_dasar)) * panjang
+    vol_tanah_full = (((l_luar_atas + l_luar_bawah) / 2) * (tinggi + t_dasar)) * panjang
+    vol_rongga_dalam = (((lebar_atas + lebar_bawah) / 2) * tinggi) * panjang
 
-    if show_galian: item_to_add.append(["Galian Tanah Profil", vol_tanah, "m³", h_galian])
-    if show_cor: item_to_add.append(["Pengecoran Beton", vol_beton, "m³", h_cor])
-
-    # Visualisasi (Koordinat di-center di X=0 agar simetris)
-    fig, ax = plt.subplots()
+    st.sidebar.header("🛠️ Pilih Pekerjaan & AHSP")
     
-    # Polygon Luar (Batas Tanah/Galian)
+    if mode_saluran == "Saluran Baru (Tanah Asli)":
+        show_galian = st.sidebar.checkbox("Galian Tanah Profil (Total)", value=True)
+        h_galian = st.sidebar.number_input("AHSP Galian (Rp/m³)", value=75000, step=5000) if show_galian else 0
+        if show_galian: item_to_add.append(["Galian Tanah Saluran Baru", vol_tanah_full, "m³", h_galian])
+        
+    else: # Mode Rehabilitasi
+        st.sidebar.info("Asumsi: Dimensi beton eksisting sama dengan rencana beton baru.")
+        show_bongkar = st.sidebar.checkbox("Bongkaran Beton Eksisting", value=True)
+        h_bongkar = st.sidebar.number_input("AHSP Bongkaran (Rp/m³)", value=250000, step=10000) if show_bongkar else 0
+        
+        show_sedimen = st.sidebar.checkbox("Galian Sedimen/Normalisasi Dalam Saluran", value=True)
+        persen_sedimen = st.sidebar.slider("Volume Sedimen (%)", 0, 100, 30) if show_sedimen else 0
+        h_sedimen = st.sidebar.number_input("AHSP Galian Lumpur/Tanah (Rp/m³)", value=85000, step=5000) if show_sedimen else 0
+        
+        if show_bongkar: item_to_add.append(["Bongkaran Beton Saluran Lama", vol_beton, "m³", h_bongkar])
+        if show_sedimen: 
+            vol_sedimen = vol_rongga_dalam * (persen_sedimen / 100)
+            item_to_add.append(["Galian Sedimen/Normalisasi Tanah", vol_sedimen, "m³", h_sedimen])
+
+    # Pengecoran selalu ada di kedua mode
+    show_cor = st.sidebar.checkbox("Pengecoran Beton Dinding & Dasar", value=True)
+    h_cor = st.sidebar.number_input("AHSP Cor (Rp/m³)", value=1200000, step=50000) if show_cor else 0
+    if show_cor: item_to_add.append(["Pengecoran Beton Dinding & Lantai", vol_beton, "m³", h_cor])
+
+    # Visualisasi
+    fig, ax = plt.subplots()
     x_luar = [-(l_luar_atas/2), -(l_luar_bawah/2), (l_luar_bawah/2), (l_luar_atas/2)]
     y_luar = [0, -(tinggi + t_dasar), -(tinggi + t_dasar), 0]
-    ax.fill(x_luar, y_luar, color='saddlebrown', alpha=0.3, label='Galian Tanah')
     
-    # Polygon Penampang Beton
-    x_beton_luar = x_luar
-    y_beton_luar = y_luar
-    x_beton_dalam = [-(lebar_atas/2), -(lebar_bawah/2), (lebar_bawah/2), (lebar_atas/2)]
-    y_beton_dalam = [0, -tinggi, -tinggi, 0]
+    x_dalam = [-(lebar_atas/2), -(lebar_bawah/2), (lebar_bawah/2), (lebar_atas/2)]
+    y_dalam = [0, -tinggi, -tinggi, 0]
     
-    # Gambar outline
+    if mode_saluran == "Saluran Baru (Tanah Asli)":
+        ax.fill(x_luar, y_luar, color='saddlebrown', alpha=0.3, label='Area Galian Tanah')
+    else:
+        ax.fill(x_dalam, y_dalam, color='saddlebrown', alpha=(persen_sedimen/100 if 'persen_sedimen' in locals() else 0), label='Sedimen Tanah')
+        ax.plot(x_luar, y_luar, color='red', linestyle='--', label='Batas Bongkaran')
+
     ax.plot(x_luar, y_luar, color='black', linewidth=1)
-    ax.plot(x_beton_dalam, y_beton_dalam, color='black', linewidth=1)
+    ax.plot(x_dalam, y_dalam, color='black', linewidth=1)
     
-    # Fill rongga di antara garis luar dan dalam
-    ax.fill_between(x_luar[:2], y_luar[:2], y_beton_dalam[:2], color='gray', alpha=0.8, label='Beton')
-    ax.fill_between(x_luar[2:], y_luar[2:], y_beton_dalam[2:], color='gray', alpha=0.8)
+    ax.fill_between(x_luar[:2], y_luar[:2], y_dalam[:2], color='gray', alpha=0.8, label='Beton Baru')
+    ax.fill_between(x_luar[2:], y_luar[2:], y_dalam[2:], color='gray', alpha=0.8)
     ax.fill_between([-(l_luar_bawah/2), (l_luar_bawah/2)], [-(tinggi + t_dasar), -(tinggi + t_dasar)], [-tinggi, -tinggi], color='gray', alpha=0.8)
 
     ax.set_aspect('equal')
-    ax.legend()
-    ax.set_title("Profil Saluran Trapesium (Tebal Variabel)")
+    ax.legend(loc='upper right')
+    ax.set_title(f"Profil Saluran - {mode_saluran}")
 
 # =====================================================================
 # 2. LOGIKA SALURAN PASANGAN BATU
 # =====================================================================
 elif jenis_bangunan == "2. Saluran Pasangan Batu (Drainase)":
-    # (Kode tetap sama seperti versi sebelumnya)
     st.sidebar.header("📐 Dimensi Drainase")
     lebar_atas = st.sidebar.number_input("Lebar Atas (m)", value=1.0)
     lebar_bawah = st.sidebar.number_input("Lebar Bawah (m)", value=0.6)
@@ -131,7 +149,7 @@ elif jenis_bangunan == "2. Saluran Pasangan Batu (Drainase)":
     ax.set_title("Saluran Pasangan Batu")
 
 # =====================================================================
-# 3. JALAN PERKERASAN LENTUR (ASPAL) - DENGAN PERSIAPAN
+# 3. JALAN PERKERASAN LENTUR (ASPAL)
 # =====================================================================
 elif jenis_bangunan == "3. Jalan Perkerasan Lentur (Aspal)":
     st.sidebar.header("📐 Dimensi Jalan")
@@ -170,7 +188,7 @@ elif jenis_bangunan == "3. Jalan Perkerasan Lentur (Aspal)":
     ax.set_title("Penampang Jalan Lentur")
 
 # =====================================================================
-# 4. JALAN PERKERASAN KAKU (RIGID PAVEMENT) - DENGAN PERSIAPAN
+# 4. JALAN PERKERASAN KAKU (RIGID PAVEMENT)
 # =====================================================================
 elif jenis_bangunan == "4. Jalan Perkerasan Kaku (Rigid)":
     st.sidebar.header("📐 Dimensi Jalan Rigid")
@@ -202,9 +220,6 @@ elif jenis_bangunan == "4. Jalan Perkerasan Kaku (Rigid)":
     ax.legend()
     ax.set_title("Penampang Jalan Kaku")
 
-# =====================================================================
-# 5 & 6 (PONDASI & DINDING PENAHAN - Logika standar disederhanakan untuk space)
-# =====================================================================
 else:
     st.info("Pilih Saluran atau Jalan di Sidebar untuk melihat update fitur terbaru.")
     fig, ax = plt.subplots()
@@ -249,7 +264,6 @@ st.header("🛒 Master Rekapitulasi Proyek (RAB)")
 if st.session_state.rekap_proyek:
     df_rekap = pd.DataFrame(st.session_state.rekap_proyek)
     
-    # 1. Menyiapkan Tabel RAB dengan Baris Pemisah (Sub-Total)
     rab_display_data = []
     kategori_unik = df_rekap['Kategori'].unique()
 
@@ -257,7 +271,6 @@ if st.session_state.rekap_proyek:
         df_kat = df_rekap[df_rekap['Kategori'] == kat]
         subtotal_kat = df_kat['Total Biaya'].sum()
         
-        # Masukkan item pekerjaan aslinya
         for _, row in df_kat.iterrows():
             rab_display_data.append({
                 "Kategori": row['Kategori'],
@@ -267,7 +280,6 @@ if st.session_state.rekap_proyek:
                 "Jumlah Harga": f"Rp {row['Total Biaya']:,.0f}"
             })
         
-        # Tambahkan Baris SUB-TOTAL
         rab_display_data.append({
             "Kategori": "",
             "Uraian Pekerjaan": f"➡️ SUB-TOTAL {kat.upper()}",
@@ -276,19 +288,14 @@ if st.session_state.rekap_proyek:
             "Jumlah Harga": f"Rp {subtotal_kat:,.0f}"
         })
         
-        # Tambahkan Baris Kosong untuk Jarak antar kategori
         rab_display_data.append({
             "Kategori": "", "Uraian Pekerjaan": "", "Volume": "", "Harga Satuan": "", "Jumlah Harga": ""
         })
 
-    # Tampilkan DataFrame
     st.subheader("📋 Format Laporan Rencana Anggaran Biaya")
     df_rab_final = pd.DataFrame(rab_display_data)
-    
-    # Gunakan st.dataframe agar tabel rapi
     st.dataframe(df_rab_final, use_container_width=True)
     
-    # 2. Grand Total Keseluruhan
     grand_total = df_rekap["Total Biaya"].sum()
     st.metric("💰 GRAND TOTAL KESELURUHAN", f"Rp {grand_total:,.0f}")
     
