@@ -47,7 +47,7 @@ ppn_pct = st.sidebar.number_input("PPN / Pajak (%)", value=11.0, step=1.0)
 st.sidebar.divider()
 
 item_to_add = []
-kategori_pekerjaan = jenis_bangunan # Menggunakan nama lengkap agar berurutan di RAB (0, 1, 2, dst)
+kategori_pekerjaan = jenis_bangunan 
 
 # =====================================================================
 # 0. PEKERJAAN PERSIAPAN (DIVISI 1)
@@ -167,7 +167,7 @@ elif jenis_bangunan == "2. Saluran Pasangan Batu (Drainase)":
     ax.set_aspect('equal')
 
 # =====================================================================
-# 3. JALAN PERKERASAN LENTUR (ASPAl)
+# 3. JALAN PERKERASAN LENTUR (ASPAL)
 # =====================================================================
 elif jenis_bangunan == "3. Jalan Perkerasan Lentur (Aspal)":
     st.sidebar.header("Dimensi Jalan")
@@ -389,10 +389,31 @@ st.pyplot(fig)
 # MASTER RAB FINAL
 # =====================================================================
 st.divider()
-st.header("Laporan Rencana Anggaran Biaya (RAB)")
+st.header("Laporan Rekapitulasi Anggaran Biaya")
 
 if st.session_state.rekap_proyek:
-    # Urutkan DataFrame berdasarkan Kategori (0, 1, 2, dst agar Persiapan di atas)
+    
+    # --- FITUR EDIT ---
+    with st.expander("✏️ Manajemen Data (Edit & Hapus Item)"):
+        st.info("Edit kolom **Pekerjaan, Volume, atau AHSP**. Untuk menghapus item, centang kotak di sebelah kiri baris, lalu tekan tombol `Delete` (tong sampah) di kanan atas tabel ini.")
+        df_raw = pd.DataFrame(st.session_state.rekap_proyek)
+        edited_df = st.data_editor(
+            df_raw,
+            column_config={
+                "Kategori": st.column_config.Column(disabled=True),
+                "Total": st.column_config.Column(disabled=True)
+            },
+            num_rows="dynamic",
+            use_container_width=True
+        )
+        
+        if st.button("💾 Simpan Perubahan Data"):
+            edited_df["Total"] = edited_df["Volume"] * edited_df["AHSP"]
+            st.session_state.rekap_proyek = edited_df.to_dict('records')
+            st.success("Data berhasil diperbarui!")
+            st.rerun()
+
+    # --- TAMPILAN TABEL RAB ---
     df = pd.DataFrame(st.session_state.rekap_proyek).sort_values(by="Kategori")
     display_data = []
     biaya_langsung = 0
@@ -402,7 +423,6 @@ if st.session_state.rekap_proyek:
         sub = df_kat['Total'].sum()
         biaya_langsung += sub
         
-        # Hilangkan angka urutan di tampilan akhir tabel
         nama_kat_bersih = kat.split(". ")[1] if ". " in kat else kat
 
         for _, row in df_kat.iterrows():
