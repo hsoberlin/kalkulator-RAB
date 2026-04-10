@@ -1,8 +1,9 @@
 import streamlit as st
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-import json # Modul bawaan Python untuk fitur Save/Load Draft
+import matplotlib.subplots as plt
+import io
+import json # Modul baru untuk menyimpan dan membuka Draft
 
 # Konfigurasi Portrait untuk HP
 st.set_page_config(page_title="Estimator RAB Konstruksi", layout="centered")
@@ -370,31 +371,39 @@ elif jenis_bangunan == "7. Pondasi Bore Pile":
 # =====================================================================
 if st.session_state.rekap_proyek:
     st.sidebar.divider()
-    st.sidebar.header("✏️ Edit/Hapus Item Tersimpan")
-    st.sidebar.write("Pilih item dari Laporan RAB untuk mengubah Volume atau AHSP.")
+    st.sidebar.header("✏️ Edit Item Tersimpan")
+    st.sidebar.write("Pilih item di bawah ini untuk mengubah Volume atau AHSP-nya:")
     
-    opsi_edit = [f"{i}. {item['Pekerjaan']} ({item['Kategori'].split('.')[0]})" for i, item in enumerate(st.session_state.rekap_proyek)]
-    pilihan_edit = st.sidebar.selectbox("Pilih Item:", opsi_edit, key="select_edit")
+    opsi_edit = [f"{i+1}. {item['Pekerjaan']} ({item['Kategori'].split('.')[0]})" for i, item in enumerate(st.session_state.rekap_proyek)]
+    pilihan_edit = st.sidebar.selectbox("Pilih Item:", ["-- Pilih Item --"] + opsi_edit, key="select_edit")
     
-    if pilihan_edit:
-        idx_edit = int(pilihan_edit.split(".")[0])
+    if pilihan_edit != "-- Pilih Item --":
+        idx_edit = int(pilihan_edit.split(".")[0]) - 1
         item_terpilih = st.session_state.rekap_proyek[idx_edit]
         
-        val_vol = st.sidebar.number_input(f"Edit Volume ({item_terpilih['Satuan']})", value=float(item_terpilih['Volume']), key="edit_vol")
-        val_ahsp = st.sidebar.number_input("Edit AHSP (Rp)", value=float(item_terpilih['AHSP']), key="edit_ahsp")
+        # Tampilkan data awal yang terekap
+        st.sidebar.info(f"**Data Saat Ini:**\n- Volume Awal: {item_terpilih['Volume']} {item_terpilih['Satuan']}\n- AHSP Awal: Rp {item_terpilih['AHSP']:,.0f}")
+        
+        # Slider persentase perubahan volume
+        persen_adj = st.sidebar.slider("Persentase Penyesuaian Volume (%)", 0, 200, 100, step=1, key="edit_adj")
+        vol_hitung = float(item_terpilih['Volume']) * (persen_adj / 100.0)
+        
+        # Input yang otomatis terupdate berdasarkan slider (tapi tetap bisa diketik manual)
+        val_vol = st.sidebar.number_input(f"Edit Volume Akhir ({item_terpilih['Satuan']})", value=float(vol_hitung), key="edit_vol")
+        val_ahsp = st.sidebar.number_input("Edit AHSP Akhir (Rp)", value=float(item_terpilih['AHSP']), key="edit_ahsp")
         
         col_e1, col_e2 = st.sidebar.columns(2)
         with col_e1:
-            if st.button("💾 Update", key="btn_update"):
+            if st.button("💾 Update Data", key="btn_update"):
                 st.session_state.rekap_proyek[idx_edit]['Volume'] = val_vol
                 st.session_state.rekap_proyek[idx_edit]['AHSP'] = val_ahsp
                 st.session_state.rekap_proyek[idx_edit]['Total'] = val_vol * val_ahsp
-                st.success("Diperbarui!")
+                st.success("Data Diperbarui!")
                 st.rerun()
         with col_e2:
-            if st.button("🗑️ Hapus", key="btn_hapus"):
+            if st.button("🗑️ Hapus Item", key="btn_hapus"):
                 st.session_state.rekap_proyek.pop(idx_edit)
-                st.success("Dihapus!")
+                st.success("Data Dihapus!")
                 st.rerun()
 
 # =====================================================================
