@@ -3,61 +3,73 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-st.set_page_config(page_title="Kalkulator Saluran Proyek PLTA", layout="wide")
+st.set_page_config(page_title="Kalkulator Saluran Proyek", layout="wide")
 
-st.title("📊 Aplikasi Perhitungan Volume Saluran (Tipikal 1)")
-st.write("Masukkan parameter dimensi saluran untuk mendapatkan koordinat dan volume secara otomatis.")
+st.title("📊 Kalkulator Volume & AHSP Saluran")
 
-# --- SIDEBAR INPUT ---
-st.sidebar.header("Input Parameter")
-lebar_atas = st.sidebar.number_input("Lebar Atas (m)", value=1.2, step=0.1)
-lebar_bawah = st.sidebar.number_input("Lebar Bawah (m)", value=0.8, step=0.1)
-tinggi = st.sidebar.number_input("Tinggi (m)", value=5.0, step=0.1)
-tebal_beton = st.sidebar.number_input("Tebal Beton (m)", value=0.2, step=0.01)
-panjang_saluran = st.sidebar.number_input("Panjang Saluran (m)", value=100.0, step=1.0)
+# --- SIDEBAR INPUT PARAMETER ---
+st.sidebar.header("1. Dimensi Saluran")
+lebar_atas = st.sidebar.number_input("Lebar Atas (m)", value=1.2)
+lebar_bawah = st.sidebar.number_input("Lebar Bawah (m)", value=0.8)
+tinggi = st.sidebar.number_input("Tinggi (m)", value=5.0)
+tebal_beton = st.sidebar.number_input("Tebal Beton (m)", value=0.2)
+panjang_saluran = st.sidebar.number_input("Panjang Saluran (m)", value=100.0)
 
-# --- LOGIKA PERHITUNGAN KOORDINAT ---
+st.sidebar.header("2. Pilih Volume yg Ditampilkan")
+show_bongkaran = st.sidebar.checkbox("Volume Bongkaran Beton", value=True)
+show_galian = st.sidebar.checkbox("Volume Galian Tanah", value=False)
+show_pengecoran = st.sidebar.checkbox("Volume Pengecoran Baru", value=True)
+
+st.sidebar.header("3. AHSP (Harga Satuan)")
+harga_bongkar = st.sidebar.number_input("Harga Bongkar per m3 (Rp)", value=250000, step=10000)
+harga_galian = st.sidebar.number_input("Harga Galian per m3 (Rp)", value=75000, step=5000)
+harga_cor = st.sidebar.number_input("Harga Cor per m3 (Rp)", value=1200000, step=50000)
+
+# --- LOGIKA PERHITUNGAN ---
 dist = (lebar_atas - lebar_bawah) / 2
 x_coords = [0, dist, dist + lebar_bawah, lebar_atas]
 y_coords = [0, -tinggi, -tinggi, 0]
 
-# Hitung Panjang Sisi (Keliling Basah)
-sisi_miring_kiri = np.sqrt((x_coords[1]-x_coords[0])**2 + (y_coords[1]-y_coords[0])**2)
-sisi_datar = lebar_bawah
-sisi_miring_kanan = np.sqrt((x_coords[3]-x_coords[2])**2 + (y_coords[3]-y_coords[2])**2)
-keliling_total = sisi_miring_kiri + sisi_datar + sisi_miring_kanan
+# Keliling Basah (Miring + Bawah + Miring)
+sisi_miring = np.sqrt(dist**2 + tinggi**2)
+keliling = (2 * sisi_miring) + lebar_bawah
 
-# Hitung Volume
-vol_bongkar_pasang = keliling_total * tebal_beton * panjang_saluran
-vol_galian_tanah = ((lebar_atas + lebar_bawah) / 2 * tinggi) * panjang_saluran
+vol_beton = keliling * tebal_beton * panjang_saluran
+vol_tanah = ((lebar_atas + lebar_bawah) / 2 * tinggi) * panjang_saluran
 
 # --- TAMPILAN UTAMA ---
 col1, col2 = st.columns([1, 1])
 
 with col1:
-    st.subheader("📍 Koordinat Penampang")
-    df_coords = pd.DataFrame({
-        'Titik': ['P1', 'P2', 'P3', 'P4'],
-        'X (Horizontal)': x_coords,
-        'Y (Vertical)': y_coords
-    })
-    st.table(df_coords)
+    st.subheader("💰 Estimasi Biaya & Volume")
+    
+    data_rekap = []
+    
+    if show_bongkaran:
+        biaya = vol_beton * harga_bongkar
+        data_rekap.append(["Bongkaran Beton", f"{vol_beton:.2f} m³", f"Rp {biaya:,.0f}"])
+        st.metric("Volume Bongkaran", f"{vol_beton:.2f} m³", f"Biaya: Rp {biaya:,.0f}")
 
-    st.subheader("📦 Hasil Perhitungan Volume")
-    st.metric("Volume Bongkaran Beton", f"{vol_bongkar_pasang:.2f} m³")
-    st.metric("Volume Galian Tanah Tengah", f"{vol_galian_tanah:.2f} m³")
-    st.metric("Volume Pengecoran Baru", f"{vol_bongkar_pasang:.2f} m³")
+    if show_galian:
+        biaya = vol_tanah * harga_galian
+        data_rekap.append(["Galian Tanah", f"{vol_tanah:.2f} m³", f"Rp {biaya:,.0f}"])
+        st.metric("Volume Galian Tanah", f"{vol_tanah:.2f} m³", f"Biaya: Rp {biaya:,.0f}")
+
+    if show_pengecoran:
+        biaya = vol_beton * harga_cor
+        data_rekap.append(["Pengecoran Baru", f"{vol_beton:.2f} m³", f"Rp {biaya:,.0f}"])
+        st.metric("Volume Pengecoran", f"{vol_beton:.2f} m³", f"Biaya: Rp {biaya:,.0f}")
+
+    # Tabel Ringkasan
+    if data_rekap:
+        st.write("### Ringkasan Tabel")
+        df = pd.DataFrame(data_rekap, columns=["Pekerjaan", "Volume", "Total Biaya"])
+        st.table(df)
 
 with col2:
-    st.subheader("📈 Visualisasi Penampang")
+    st.subheader("📈 Visualisasi Potongan Melintang")
     fig, ax = plt.subplots()
-    ax.plot(x_coords, y_coords, marker='o', linestyle='-', color='#1f77b4', linewidth=3)
-    ax.fill(x_coords, y_coords, color='#aec7e8', alpha=0.3)
+    ax.plot(x_coords, y_coords, marker='o', color='brown', linewidth=2)
+    ax.fill(x_coords, y_coords, color='cyan', alpha=0.1)
     ax.set_aspect('equal')
-    ax.grid(True, linestyle='--', alpha=0.6)
-    ax.set_xlabel("Lebar (m)")
-    ax.set_ylabel("Kedalaman (m)")
     st.pyplot(fig)
-
-st.divider()
-st.info("💡 Tip: Anda bisa mengubah angka di sidebar kiri untuk langsung melihat perubahan volume dan grafik.")
