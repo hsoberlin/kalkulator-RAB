@@ -2,7 +2,6 @@ import streamlit as st
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-import io
 
 # Konfigurasi Portrait untuk HP
 st.set_page_config(page_title="Estimator RAB Konstruksi", layout="centered")
@@ -394,13 +393,35 @@ st.write("---")
 st.pyplot(fig)
 
 # =====================================================================
-# MASTER RAB FINAL & EXPORT EXCEL
+# MASTER RAB FINAL & FITUR EDIT DATA (TANPA EXCEL EXPORT)
 # =====================================================================
 st.divider()
 st.header("Laporan Rencana Anggaran Biaya (RAB)")
 
 if st.session_state.rekap_proyek:
-    # --- TAMPILAN TABEL RAB (HANYA DISPLAY) ---
+    
+    # --- FITUR EDIT ---
+    with st.expander("✏️ Manajemen Data (Edit & Hapus Item)"):
+        st.info("Edit kolom **Pekerjaan, Volume, atau AHSP**. Untuk menghapus item, centang kotak di sebelah kiri baris, lalu tekan icon `Delete` (tong sampah) di pojok kanan atas tabel ini.")
+        df_raw = pd.DataFrame(st.session_state.rekap_proyek)
+        edited_df = st.data_editor(
+            df_raw,
+            column_config={
+                "Kategori": st.column_config.Column(disabled=True),
+                "Total": st.column_config.Column(disabled=True)
+            },
+            num_rows="dynamic",
+            use_container_width=True,
+            key="editor_tabel"
+        )
+        
+        if st.button("💾 Simpan Perubahan Data"):
+            edited_df["Total"] = edited_df["Volume"] * edited_df["AHSP"]
+            st.session_state.rekap_proyek = edited_df.to_dict('records')
+            st.success("Data berhasil diperbarui!")
+            st.rerun()
+
+    # --- TAMPILAN TABEL RAB ---
     df = pd.DataFrame(st.session_state.rekap_proyek).sort_values(by="Kategori")
     display_data = []
     biaya_langsung = 0
@@ -413,87 +434,26 @@ if st.session_state.rekap_proyek:
         nama_kat_bersih = kat.split(". ")[1] if ". " in kat else kat
 
         for _, row in df_kat.iterrows():
-            display_data.append({
-                "Uraian Pekerjaan": row['Pekerjaan'], 
-                "Volume": f"{row['Volume']} {row['Satuan']}", 
-                "Harga Satuan": f"Rp {row['AHSP']:,.0f}", 
-                "Jumlah Harga": f"Rp {row['Total']:,.0f}"
-            })
-        display_data.append({
-            "Uraian Pekerjaan": f"SUB-TOTAL {nama_kat_bersih.upper()}", 
-            "Volume": "", "Harga Satuan": "", "Jumlah Harga": f"Rp {sub:,.0f}"
-        })
-        display_data.append({
-            "Uraian Pekerjaan": "", "Volume": "", "Harga Satuan": "", "Jumlah Harga": ""
-        })
+            display_data.append({"Uraian Pekerjaan": row['Pekerjaan'], "Volume": f"{row['Volume']} {row['Satuan']}", "Harga Satuan": f"Rp {row['AHSP']:,.0f}", "Jumlah Harga": f"Rp {row['Total']:,.0f}"})
+        display_data.append({"Uraian Pekerjaan": f"SUB-TOTAL {nama_kat_bersih.upper()}", "Volume": "", "Harga Satuan": "", "Jumlah Harga": f"Rp {sub:,.0f}"})
+        display_data.append({"Uraian Pekerjaan": "", "Volume": "", "Harga Satuan": "", "Jumlah Harga": ""})
 
     oh = biaya_langsung * (overhead_pct/100)
     ppn = (biaya_langsung + oh) * (ppn_pct/100)
     total_akhir = biaya_langsung + oh + ppn
 
-    # Data tambahan untuk Export Excel
-    export_data = display_data.copy()
-    export_data.append({"Uraian Pekerjaan": "========================================", "Volume": "", "Harga Satuan": "", "Jumlah Harga": ""})
-    export_data.append({"Uraian Pekerjaan": "A. TOTAL BIAYA LANGSUNG", "Volume": "", "Harga Satuan": "", "Jumlah Harga": f"Rp {biaya_langsung:,.0f}"})
-    export_data.append({"Uraian Pekerjaan": f"B. OVERHEAD & PROFIT ({overhead_pct}%)", "Volume": "", "Harga Satuan": "", "Jumlah Harga": f"Rp {oh:,.0f}"})
-    export_data.append({"Uraian Pekerjaan": "C. TOTAL (A + B)", "Volume": "", "Harga Satuan": "", "Jumlah Harga": f"Rp {biaya_langsung + oh:,.0f}"})
-    export_data.append({"Uraian Pekerjaan": f"D. PPN / PAJAK ({ppn_pct}%)", "Volume": "", "Harga Satuan": "", "Jumlah Harga": f"Rp {ppn:,.0f}"})
-    export_data.append({"Uraian Pekerjaan": "GRAND TOTAL KONTRAK", "Volume": "", "Harga Satuan": "", "Jumlah Harga": f"Rp {total_akhir:,.0f}"})
+    display_data.append({"Uraian Pekerjaan": "========================================", "Volume": "", "Harga Satuan": "", "Jumlah Harga": ""})
+    display_data.append({"Uraian Pekerjaan": "A. TOTAL BIAYA LANGSUNG", "Volume": "", "Harga Satuan": "", "Jumlah Harga": f"Rp {biaya_langsung:,.0f}"})
+    display_data.append({"Uraian Pekerjaan": f"B. OVERHEAD & PROFIT ({overhead_pct}%)", "Volume": "", "Harga Satuan": "", "Jumlah Harga": f"Rp {oh:,.0f}"})
+    display_data.append({"Uraian Pekerjaan": "C. TOTAL (A + B)", "Volume": "", "Harga Satuan": "", "Jumlah Harga": f"Rp {biaya_langsung + oh:,.0f}"})
+    display_data.append({"Uraian Pekerjaan": f"D. PPN / PAJAK ({ppn_pct}%)", "Volume": "", "Harga Satuan": "", "Jumlah Harga": f"Rp {ppn:,.0f}"})
+    display_data.append({"Uraian Pekerjaan": "GRAND TOTAL KONTRAK", "Volume": "", "Harga Satuan": "", "Jumlah Harga": f"Rp {total_akhir:,.0f}"})
 
-    df_export = pd.DataFrame(export_data)
-    
-    # Tampilkan di Streamlit
-    st.dataframe(df_export, use_container_width=True)
-
-    # =====================================================================
-    # FITUR EXPORT EXCEL PROFESIONAL DENGAN GAMBAR
-    # =====================================================================
-    excel_buffer = io.BytesIO()
-    with pd.ExcelWriter(excel_buffer, engine='xlsxwriter') as writer:
-        df_export.to_excel(writer, sheet_name='Laporan RAB', startrow=4, index=False)
-        workbook = writer.book
-        worksheet = writer.sheets['Laporan RAB']
-        
-        # Format Style Header Excel
-        title_fmt = workbook.add_format({'bold': True, 'font_size': 14})
-        sub_fmt = workbook.add_format({'bold': True, 'font_size': 11, 'font_color': 'gray'})
-        header_fmt = workbook.add_format({'bold': True, 'bg_color': '#D3D3D3', 'border': 1})
-        
-        worksheet.write('A1', 'LAPORAN RENCANA ANGGARAN BIAYA (RAB)', title_fmt)
-        worksheet.write('A2', 'By: Pemeliharaan Sipil SGL', sub_fmt)
-        
-        # Set Lebar Kolom
-        worksheet.set_column('A:A', 50)
-        worksheet.set_column('B:D', 20)
-        
-        # Style header tabel
-        for col_num, value in enumerate(df_export.columns.values):
-            worksheet.write(4, col_num, value, header_fmt)
-            
-        # Sisipkan Gambar Plot Terakhir
-        img_buffer = io.BytesIO()
-        fig.savefig(img_buffer, format='png', bbox_inches='tight', dpi=150)
-        img_buffer.seek(0)
-        
-        row_img = len(export_data) + 7
-        worksheet.write(row_img - 1, 0, "GAMBAR POTONGAN / VISUALISASI:", workbook.add_format({'bold': True}))
-        worksheet.insert_image(row_img, 0, 'potongan.png', {'image_data': img_buffer, 'x_scale': 0.7, 'y_scale': 0.7})
-        
-    excel_buffer.seek(0)
+    st.dataframe(pd.DataFrame(display_data), use_container_width=True)
     
     st.write("---")
-    col_dl, col_del = st.columns([3, 2])
-    with col_dl:
-        st.download_button(
-            label="📥 Download Excel Resmi (Dilengkapi Gambar)",
-            data=excel_buffer,
-            file_name="Laporan_RAB_Pemeliharaan_Sipil_SGL.xlsx",
-            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            use_container_width=True
-        )
-    with col_del:
-        if st.button("🗑️ Kosongkan Master Rekap", use_container_width=True):
-            st.session_state.rekap_proyek = []
-            st.rerun()
+    if st.button("🗑️ Kosongkan Master Rekap", use_container_width=True):
+        st.session_state.rekap_proyek = []
+        st.rerun()
 else:
-    st.info("Belum ada data di rekapitulasi.")
+    st.info("Silakan proses perhitungan melalui menu navigasi di atas dan tekan 'Tambahkan ke Master Rekap' untuk memunculkan tabel laporan RAB.")
