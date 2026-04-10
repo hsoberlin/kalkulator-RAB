@@ -25,7 +25,8 @@ jenis_bangunan = st.sidebar.selectbox(
         "5. Pondasi Telapak",
         "6. Dinding Penahan Tanah (Kantilever)",
         "7. Pondasi Bore Pile"
-    ]
+    ],
+    key="navigasi_utama"
 )
 
 st.sidebar.divider()
@@ -34,15 +35,16 @@ st.sidebar.divider()
 st.sidebar.title("Kondisi Lahan Awal")
 mode_proyek = st.sidebar.radio(
     "Metode Pelaksanaan:", 
-    ["Bangunan Baru", "Rehabilitasi Struktur"]
+    ["Bangunan Baru", "Rehabilitasi Struktur"],
+    key="mode_global"
 )
 
 st.sidebar.divider()
 
 # --- PENGATURAN KEUANGAN ---
 st.sidebar.title("Pengaturan Keuangan")
-overhead_pct = st.sidebar.number_input("Overhead & Profit (%)", value=10.0, step=1.0)
-ppn_pct = st.sidebar.number_input("PPN / Pajak (%)", value=11.0, step=1.0)
+overhead_pct = st.sidebar.number_input("Overhead & Profit (%)", value=10.0, step=1.0, key="global_oh")
+ppn_pct = st.sidebar.number_input("PPN / Pajak (%)", value=11.0, step=1.0, key="global_ppn")
 
 st.sidebar.divider()
 
@@ -55,17 +57,17 @@ kategori_pekerjaan = jenis_bangunan
 if jenis_bangunan == "0. Pekerjaan Persiapan (Divisi 1)":
     st.sidebar.header("Item Persiapan (Lump Sum)")
     
-    show_survey = st.sidebar.checkbox("Survey, Pengukuran & Pasang Bowplank", value=True)
-    h_survey = st.sidebar.number_input("Biaya Survey (Rp)", value=5000000) if show_survey else 0
+    show_survey = st.sidebar.checkbox("Survey, Pengukuran & Pasang Bowplank", value=True, key="0_cb_surv")
+    h_survey = st.sidebar.number_input("Biaya Survey (Rp)", value=5000000, key="0_h_surv") if show_survey else 0
 
-    show_k3 = st.sidebar.checkbox("Penyelenggaraan SMK3 (K3 Konstruksi)", value=True)
-    h_k3 = st.sidebar.number_input("Biaya K3 (Rp)", value=3500000) if show_k3 else 0
+    show_k3 = st.sidebar.checkbox("Penyelenggaraan SMK3 (K3 Konstruksi)", value=True, key="0_cb_k3")
+    h_k3 = st.sidebar.number_input("Biaya K3 (Rp)", value=3500000, key="0_h_k3") if show_k3 else 0
 
-    show_mob = st.sidebar.checkbox("Mobilisasi & Demobilisasi Alat Berat", value=True)
-    h_mob = st.sidebar.number_input("Biaya Mob-Demob (Rp)", value=12000000) if show_mob else 0
+    show_mob = st.sidebar.checkbox("Mobilisasi & Demobilisasi Alat Berat", value=True, key="0_cb_mob")
+    h_mob = st.sidebar.number_input("Biaya Mob-Demob (Rp)", value=12000000, key="0_h_mob") if show_mob else 0
 
-    show_direksi = st.sidebar.checkbox("Sewa/Pembuatan Direksi Keet", value=True)
-    h_direksi = st.sidebar.number_input("Biaya Direksi Keet (Rp)", value=7500000) if show_direksi else 0
+    show_direksi = st.sidebar.checkbox("Sewa/Pembuatan Direksi Keet", value=True, key="0_cb_dir")
+    h_direksi = st.sidebar.number_input("Biaya Direksi Keet (Rp)", value=7500000, key="0_h_dir") if show_direksi else 0
 
     if show_survey: item_to_add.append(["Survey, Pengukuran & Bowplank", 1.0, "LS", h_survey])
     if show_k3: item_to_add.append(["Penyelenggaraan SMK3", 1.0, "LS", h_k3])
@@ -81,13 +83,13 @@ if jenis_bangunan == "0. Pekerjaan Persiapan (Divisi 1)":
 # =====================================================================
 elif jenis_bangunan == "1. Saluran Trapesium (Beton)":
     st.sidebar.header("Dimensi Saluran")
-    l_atas = st.sidebar.number_input("Lebar Dalam Atas (m)", value=1.2)
-    l_bawah = st.sidebar.number_input("Lebar Dalam Bawah (m)", value=0.8)
-    tinggi = st.sidebar.number_input("Tinggi Saluran (m)", value=5.0)
-    panjang = st.sidebar.number_input("Panjang Saluran (m)", value=100.0)
-    t_atas = st.sidebar.number_input("Tebal Atas (m)", value=0.15)
-    t_bawah = st.sidebar.number_input("Tebal Bawah (m)", value=0.25)
-    t_dasar = st.sidebar.number_input("Tebal Dasar (m)", value=0.30)
+    l_atas = st.sidebar.number_input("Lebar Dalam Atas (m)", value=1.2, key="1_la")
+    l_bawah = st.sidebar.number_input("Lebar Dalam Bawah (m)", value=0.8, key="1_lb")
+    tinggi = st.sidebar.number_input("Tinggi Saluran (m)", value=5.0, key="1_t")
+    panjang = st.sidebar.number_input("Panjang Saluran (m)", value=100.0, key="1_p")
+    t_atas = st.sidebar.number_input("Tebal Atas (m)", value=0.15, key="1_ta")
+    t_bawah = st.sidebar.number_input("Tebal Bawah (m)", value=0.25, key="1_tb")
+    t_dasar = st.sidebar.number_input("Tebal Dasar (m)", value=0.30, key="1_td")
 
     dist = (l_atas - l_bawah) / 2
     s_miring = np.sqrt(dist**2 + tinggi**2)
@@ -97,26 +99,26 @@ elif jenis_bangunan == "1. Saluran Trapesium (Beton)":
 
     st.sidebar.header("Pekerjaan & AHSP")
     if mode_proyek == "Bangunan Baru":
-        show_galian = st.sidebar.checkbox("Galian Tanah Profil", value=True)
-        h_galian = st.sidebar.number_input("AHSP Galian (Rp/m³)", value=75000) if show_galian else 0
+        show_galian = st.sidebar.checkbox("Galian Tanah Profil", value=True, key="1_cb_gal")
+        h_galian = st.sidebar.number_input("AHSP Galian (Rp/m³)", value=75000, key="1_h_gal") if show_galian else 0
         if show_galian: item_to_add.append(["Galian Tanah Profil Baru", vol_tanah, "m³", h_galian])
     else:
-        p_bongkar = st.sidebar.slider("Persen Bongkaran (%)", 0, 100, 100)
-        p_sedimen = st.sidebar.slider("Persen Sedimen (%)", 0, 100, 30)
-        show_bongkar = st.sidebar.checkbox("Bongkaran Beton Eksisting", value=True)
-        h_bongkar = st.sidebar.number_input("AHSP Bongkaran (Rp/m³)", value=250000) if show_bongkar else 0
-        show_sedimen = st.sidebar.checkbox("Galian Sedimen Saluran", value=True)
-        h_sedimen = st.sidebar.number_input("AHSP Galian Sedimen (Rp/m³)", value=85000) if show_sedimen else 0
+        p_bongkar = st.sidebar.slider("Persen Bongkaran (%)", 0, 100, 100, key="1_sl_bongk")
+        p_sedimen = st.sidebar.slider("Persen Sedimen (%)", 0, 100, 30, key="1_sl_sed")
+        show_bongkar = st.sidebar.checkbox("Bongkaran Beton Eksisting", value=True, key="1_cb_bongk")
+        h_bongkar = st.sidebar.number_input("AHSP Bongkaran (Rp/m³)", value=250000, key="1_h_bongk") if show_bongkar else 0
+        show_sedimen = st.sidebar.checkbox("Galian Sedimen Saluran", value=True, key="1_cb_sed")
+        h_sedimen = st.sidebar.number_input("AHSP Galian Sedimen (Rp/m³)", value=85000, key="1_h_sed") if show_sedimen else 0
         if show_bongkar: item_to_add.append([f"Bongkaran Beton ({p_bongkar}%)", vol_beton*(p_bongkar/100), "m³", h_bongkar])
         if show_sedimen: item_to_add.append(["Galian Sedimen/Lumpur", vol_rongga*(p_sedimen/100), "m³", h_sedimen])
 
-    show_bekisting = st.sidebar.checkbox("Bekisting Dinding Saluran", value=True)
-    h_bekisting = st.sidebar.number_input("AHSP Bekisting (Rp/m²)", value=125000) if show_bekisting else 0
-    show_cor = st.sidebar.checkbox("Pengecoran Beton Saluran", value=True)
-    h_cor = st.sidebar.number_input("AHSP Cor Beton (Rp/m³)", value=1200000) if show_cor else 0
-    show_besi = st.sidebar.checkbox("Pembesian Saluran", value=True)
-    r_besi = st.sidebar.number_input("Rasio Besi (kg/m³)", value=110) if show_besi else 0
-    h_besi = st.sidebar.number_input("AHSP Besi (Rp/kg)", value=18500) if show_besi else 0
+    show_bekisting = st.sidebar.checkbox("Bekisting Dinding Saluran", value=True, key="1_cb_bek")
+    h_bekisting = st.sidebar.number_input("AHSP Bekisting (Rp/m²)", value=125000, key="1_h_bek") if show_bekisting else 0
+    show_cor = st.sidebar.checkbox("Pengecoran Beton Saluran", value=True, key="1_cb_cor")
+    h_cor = st.sidebar.number_input("AHSP Cor Beton (Rp/m³)", value=1200000, key="1_h_cor") if show_cor else 0
+    show_besi = st.sidebar.checkbox("Pembesian Saluran", value=True, key="1_cb_besi")
+    r_besi = st.sidebar.number_input("Rasio Besi (kg/m³)", value=110, key="1_r_besi") if show_besi else 0
+    h_besi = st.sidebar.number_input("AHSP Besi (Rp/kg)", value=18500, key="1_h_besi") if show_besi else 0
 
     if show_bekisting: item_to_add.append(["Bekisting Dinding Saluran", (s_miring * 2) * panjang, "m²", h_bekisting])
     if show_cor: item_to_add.append(["Beton Struktur Saluran", vol_beton, "m³", h_cor])
@@ -132,11 +134,11 @@ elif jenis_bangunan == "1. Saluran Trapesium (Beton)":
 # =====================================================================
 elif jenis_bangunan == "2. Saluran Pasangan Batu (Drainase)":
     st.sidebar.header("Dimensi Drainase")
-    l_atas = st.sidebar.number_input("Lebar Atas (m)", value=1.0)
-    l_bawah = st.sidebar.number_input("Lebar Bawah (m)", value=0.6)
-    tinggi = st.sidebar.number_input("Tinggi (m)", value=1.2)
-    tebal = st.sidebar.number_input("Tebal Batu (m)", value=0.25)
-    panjang = st.sidebar.number_input("Panjang (m)", value=100.0)
+    l_atas = st.sidebar.number_input("Lebar Atas (m)", value=1.0, key="2_la")
+    l_bawah = st.sidebar.number_input("Lebar Bawah (m)", value=0.6, key="2_lb")
+    tinggi = st.sidebar.number_input("Tinggi (m)", value=1.2, key="2_t")
+    tebal = st.sidebar.number_input("Tebal Batu (m)", value=0.25, key="2_tb")
+    panjang = st.sidebar.number_input("Panjang (m)", value=100.0, key="2_p")
 
     dist = (l_atas - l_bawah) / 2
     keliling = (2 * np.sqrt(dist**2 + tinggi**2)) + l_bawah
@@ -145,19 +147,19 @@ elif jenis_bangunan == "2. Saluran Pasangan Batu (Drainase)":
     st.sidebar.header("Pekerjaan & AHSP")
     if mode_proyek == "Bangunan Baru":
         vol_galian = (((l_atas+(2*tebal)) + (l_bawah+(2*tebal)))/2 * (tinggi+tebal)) * panjang
-        show_galian = st.sidebar.checkbox("Galian Tanah Drainase", value=True)
-        h_galian = st.sidebar.number_input("AHSP Galian (Rp/m³)", value=75000) if show_galian else 0
+        show_galian = st.sidebar.checkbox("Galian Tanah Drainase", value=True, key="2_cb_gal")
+        h_galian = st.sidebar.number_input("AHSP Galian (Rp/m³)", value=75000, key="2_h_gal") if show_galian else 0
         if show_galian: item_to_add.append(["Galian Tanah Drainase", vol_galian, "m³", h_galian])
     else:
-        p_bongkar = st.sidebar.slider("Persen Bongkaran (%)", 0, 100, 100, key="b_batu")
-        show_bongkar = st.sidebar.checkbox("Bongkaran Batu Eksisting", value=True)
-        h_bongkar = st.sidebar.number_input("AHSP Bongkaran (Rp/m³)", value=150000) if show_bongkar else 0
+        p_bongkar = st.sidebar.slider("Persen Bongkaran (%)", 0, 100, 100, key="2_sl_bongk")
+        show_bongkar = st.sidebar.checkbox("Bongkaran Batu Eksisting", value=True, key="2_cb_bongk")
+        h_bongkar = st.sidebar.number_input("AHSP Bongkaran (Rp/m³)", value=150000, key="2_h_bongk") if show_bongkar else 0
         if show_bongkar: item_to_add.append([f"Bongkaran Batu Eksisting ({p_bongkar}%)", vol_batu * (p_bongkar/100), "m³", h_bongkar])
 
-    show_pasangan = st.sidebar.checkbox("Pasangan Batu Kali (1:4)", value=True)
-    h_pasangan = st.sidebar.number_input("AHSP Pasangan Batu (Rp/m³)", value=950000) if show_pasangan else 0
-    show_plester = st.sidebar.checkbox("Plesteran + Acian", value=True)
-    h_plester = st.sidebar.number_input("AHSP Plesteran (Rp/m²)", value=65000) if show_plester else 0
+    show_pasangan = st.sidebar.checkbox("Pasangan Batu Kali (1:4)", value=True, key="2_cb_pas")
+    h_pasangan = st.sidebar.number_input("AHSP Pasangan Batu (Rp/m³)", value=950000, key="2_h_pas") if show_pasangan else 0
+    show_plester = st.sidebar.checkbox("Plesteran + Acian", value=True, key="2_cb_ples")
+    h_plester = st.sidebar.number_input("AHSP Plesteran (Rp/m²)", value=65000, key="2_h_ples") if show_plester else 0
 
     if show_pasangan: item_to_add.append(["Pasangan Batu Kali (1:4)", vol_batu, "m³", h_pasangan])
     if show_plester: item_to_add.append(["Plesteran + Acian", keliling * panjang, "m²", h_plester])
@@ -171,29 +173,29 @@ elif jenis_bangunan == "2. Saluran Pasangan Batu (Drainase)":
 # =====================================================================
 elif jenis_bangunan == "3. Jalan Perkerasan Lentur (Aspal)":
     st.sidebar.header("Dimensi Jalan")
-    lebar = st.sidebar.number_input("Lebar (m)", value=6.0)
-    panjang = st.sidebar.number_input("Panjang (m)", value=1000.0)
-    t_aspal = st.sidebar.number_input("Tebal Aspal (m)", value=0.05)
-    t_base = st.sidebar.number_input("Tebal Agregat (m)", value=0.15)
+    lebar = st.sidebar.number_input("Lebar (m)", value=6.0, key="3_l")
+    panjang = st.sidebar.number_input("Panjang (m)", value=1000.0, key="3_p")
+    t_aspal = st.sidebar.number_input("Tebal Aspal (m)", value=0.05, key="3_tasp")
+    t_base = st.sidebar.number_input("Tebal Agregat (m)", value=0.15, key="3_tbase")
 
     st.sidebar.header("Pekerjaan & AHSP")
     if mode_proyek == "Bangunan Baru":
-        show_grading = st.sidebar.checkbox("Penyiapan Badan Jalan", value=True)
-        h_grading = st.sidebar.number_input("AHSP Penyiapan (Rp/m²)", value=12000) if show_grading else 0
-        show_base = st.sidebar.checkbox("Lapis Pondasi Agregat A", value=True)
-        h_base = st.sidebar.number_input("AHSP Agregat A (Rp/m³)", value=450000) if show_base else 0
+        show_grading = st.sidebar.checkbox("Penyiapan Badan Jalan", value=True, key="3_cb_grad")
+        h_grading = st.sidebar.number_input("AHSP Penyiapan (Rp/m²)", value=12000, key="3_h_grad") if show_grading else 0
+        show_base = st.sidebar.checkbox("Lapis Pondasi Agregat A", value=True, key="3_cb_base")
+        h_base = st.sidebar.number_input("AHSP Agregat A (Rp/m³)", value=450000, key="3_h_base") if show_base else 0
         if show_grading: item_to_add.append(["Penyiapan Badan Jalan", lebar * panjang, "m²", h_grading])
         if show_base: item_to_add.append(["Lapis Pondasi Agregat A", lebar * panjang * t_base, "m³", h_base])
     else:
-        show_milling = st.sidebar.checkbox("Cold Milling (Kupas Aspal)", value=True)
-        h_milling = st.sidebar.number_input("AHSP Milling (Rp/m³)", value=350000) if show_milling else 0
-        show_tack = st.sidebar.checkbox("Lapis Perekat (Tack Coat)", value=True)
-        h_tack = st.sidebar.number_input("AHSP Tack Coat (Rp/Liter)", value=15000) if show_tack else 0
+        show_milling = st.sidebar.checkbox("Cold Milling (Kupas Aspal)", value=True, key="3_cb_mill")
+        h_milling = st.sidebar.number_input("AHSP Milling (Rp/m³)", value=350000, key="3_h_mill") if show_milling else 0
+        show_tack = st.sidebar.checkbox("Lapis Perekat (Tack Coat)", value=True, key="3_cb_tack")
+        h_tack = st.sidebar.number_input("AHSP Tack Coat (Rp/Liter)", value=15000, key="3_h_tack") if show_tack else 0
         if show_milling: item_to_add.append(["Cold Milling (Kupas Aspal)", lebar * panjang * t_aspal, "m³", h_milling])
         if show_tack: item_to_add.append(["Lapis Perekat (Tack Coat)", lebar * panjang * 0.35, "Liter", h_tack])
 
-    show_aspal = st.sidebar.checkbox("Aspal Hotmix AC-WC", value=True)
-    h_aspal = st.sidebar.number_input("AHSP Aspal (Rp/m³)", value=2500000) if show_aspal else 0
+    show_aspal = st.sidebar.checkbox("Aspal Hotmix AC-WC", value=True, key="3_cb_asp")
+    h_aspal = st.sidebar.number_input("AHSP Aspal (Rp/m³)", value=2500000, key="3_h_asp") if show_aspal else 0
     if show_aspal: item_to_add.append(["Aspal Hotmix AC-WC", lebar * panjang * t_aspal, "m³", h_aspal])
 
     fig, ax = plt.subplots()
@@ -205,31 +207,31 @@ elif jenis_bangunan == "3. Jalan Perkerasan Lentur (Aspal)":
 # =====================================================================
 elif jenis_bangunan == "4. Jalan Perkerasan Kaku (Rigid)":
     st.sidebar.header("Dimensi Rigid")
-    lebar = st.sidebar.number_input("Lebar (m)", value=5.0)
-    panjang = st.sidebar.number_input("Panjang (m)", value=500.0)
-    t_rigid = st.sidebar.number_input("Tebal Rigid (m)", value=0.25)
-    t_lc = st.sidebar.number_input("Tebal Lantai Kerja (m)", value=0.10)
+    lebar = st.sidebar.number_input("Lebar (m)", value=5.0, key="4_l")
+    panjang = st.sidebar.number_input("Panjang (m)", value=500.0, key="4_p")
+    t_rigid = st.sidebar.number_input("Tebal Rigid (m)", value=0.25, key="4_trig")
+    t_lc = st.sidebar.number_input("Tebal Lantai Kerja (m)", value=0.10, key="4_tlc")
 
     st.sidebar.header("Pekerjaan & AHSP")
     if mode_proyek == "Bangunan Baru":
-        show_grading = st.sidebar.checkbox("Penyiapan Badan Jalan", value=True)
-        h_grading = st.sidebar.number_input("AHSP Penyiapan (Rp/m²)", value=12000) if show_grading else 0
+        show_grading = st.sidebar.checkbox("Penyiapan Badan Jalan", value=True, key="4_cb_grad")
+        h_grading = st.sidebar.number_input("AHSP Penyiapan (Rp/m²)", value=12000, key="4_h_grad") if show_grading else 0
         if show_grading: item_to_add.append(["Penyiapan Badan Jalan", lebar * panjang, "m²", h_grading])
     else:
-        p_bongkar = st.sidebar.slider("Persen Bongkaran (%)", 0, 100, 100, key="b_rig")
-        show_bongkar = st.sidebar.checkbox("Bongkaran Rigid Eksisting", value=True)
-        h_bongkar = st.sidebar.number_input("AHSP Bongkaran Rigid (Rp/m³)", value=450000) if show_bongkar else 0
+        p_bongkar = st.sidebar.slider("Persen Bongkaran (%)", 0, 100, 100, key="4_sl_bongk")
+        show_bongkar = st.sidebar.checkbox("Bongkaran Rigid Eksisting", value=True, key="4_cb_bongk")
+        h_bongkar = st.sidebar.number_input("AHSP Bongkaran Rigid (Rp/m³)", value=450000, key="4_h_bongk") if show_bongkar else 0
         if show_bongkar: item_to_add.append([f"Bongkaran Rigid Eksisting ({p_bongkar}%)", (lebar * panjang * t_rigid) * (p_bongkar/100), "m³", h_bongkar])
 
-    show_lc = st.sidebar.checkbox("Lantai Kerja (LC)", value=True)
-    h_lc = st.sidebar.number_input("AHSP Lantai Kerja (Rp/m³)", value=950000) if show_lc else 0
-    show_bekisting = st.sidebar.checkbox("Bekisting Sisi Jalan", value=True)
-    h_bekisting = st.sidebar.number_input("AHSP Bekisting (Rp/m²)", value=125000) if show_bekisting else 0
-    show_rigid = st.sidebar.checkbox("Beton Rigid K-350", value=True)
-    h_rigid = st.sidebar.number_input("AHSP Beton Rigid (Rp/m³)", value=1450000) if show_rigid else 0
-    show_besi = st.sidebar.checkbox("Pembesian (Dowel/Wiremesh)", value=True)
-    r_besi = st.sidebar.number_input("Rasio Besi (kg/m³)", value=60) if show_besi else 0
-    h_besi = st.sidebar.number_input("AHSP Besi (Rp/kg)", value=18500) if show_besi else 0
+    show_lc = st.sidebar.checkbox("Lantai Kerja (LC)", value=True, key="4_cb_lc")
+    h_lc = st.sidebar.number_input("AHSP Lantai Kerja (Rp/m³)", value=950000, key="4_h_lc") if show_lc else 0
+    show_bekisting = st.sidebar.checkbox("Bekisting Sisi Jalan", value=True, key="4_cb_bek")
+    h_bekisting = st.sidebar.number_input("AHSP Bekisting (Rp/m²)", value=125000, key="4_h_bek") if show_bekisting else 0
+    show_rigid = st.sidebar.checkbox("Beton Rigid K-350", value=True, key="4_cb_rig")
+    h_rigid = st.sidebar.number_input("AHSP Beton Rigid (Rp/m³)", value=1450000, key="4_h_rig") if show_rigid else 0
+    show_besi = st.sidebar.checkbox("Pembesian (Dowel/Wiremesh)", value=True, key="4_cb_besi")
+    r_besi = st.sidebar.number_input("Rasio Besi (kg/m³)", value=60, key="4_r_besi") if show_besi else 0
+    h_besi = st.sidebar.number_input("AHSP Besi (Rp/kg)", value=18500, key="4_h_besi") if show_besi else 0
 
     if show_lc: item_to_add.append(["Lantai Kerja (LC)", lebar * panjang * t_lc, "m³", h_lc])
     if show_bekisting: item_to_add.append(["Bekisting Sisi Jalan", (t_rigid + t_lc) * panjang * 2, "m²", h_bekisting])
@@ -246,29 +248,29 @@ elif jenis_bangunan == "4. Jalan Perkerasan Kaku (Rigid)":
 # =====================================================================
 elif jenis_bangunan == "5. Pondasi Telapak":
     st.sidebar.header("Dimensi Pondasi")
-    p = st.sidebar.number_input("Panjang Plat (m)", value=1.5)
-    l = st.sidebar.number_input("Lebar Plat (m)", value=1.5)
-    t = st.sidebar.number_input("Tebal Plat (m)", value=0.3)
-    jml = st.sidebar.number_input("Jumlah Titik", value=10)
+    p = st.sidebar.number_input("Panjang Plat (m)", value=1.5, key="5_p")
+    l = st.sidebar.number_input("Lebar Plat (m)", value=1.5, key="5_l")
+    t = st.sidebar.number_input("Tebal Plat (m)", value=0.3, key="5_t")
+    jml = st.sidebar.number_input("Jumlah Titik", value=10, key="5_jml")
     vol_beton = p * l * t * jml
 
     st.sidebar.header("Pekerjaan & AHSP")
     if mode_proyek != "Bangunan Baru":
-        show_bongkar = st.sidebar.checkbox("Bongkaran Struktur Lama", value=True)
-        h_bongkar = st.sidebar.number_input("AHSP Bongkaran (Rp/m³)", value=350000) if show_bongkar else 0
+        show_bongkar = st.sidebar.checkbox("Bongkaran Struktur Lama", value=True, key="5_cb_bongk")
+        h_bongkar = st.sidebar.number_input("AHSP Bongkaran (Rp/m³)", value=350000, key="5_h_bongk") if show_bongkar else 0
         if show_bongkar: item_to_add.append(["Bongkaran Struktur Lama", vol_beton, "m³", h_bongkar])
 
-    show_galian = st.sidebar.checkbox("Galian Tanah Pondasi", value=True)
-    h_galian = st.sidebar.number_input("AHSP Galian (Rp/m³)", value=75000) if show_galian else 0
-    show_lc = st.sidebar.checkbox("Lantai Kerja Pondasi", value=True)
-    h_lc = st.sidebar.number_input("AHSP Lantai Kerja (Rp/m³)", value=950000) if show_lc else 0
-    show_bekisting = st.sidebar.checkbox("Bekisting Plat Pondasi", value=True)
-    h_bekisting = st.sidebar.number_input("AHSP Bekisting (Rp/m²)", value=145000) if show_bekisting else 0
-    show_cor = st.sidebar.checkbox("Beton Plat Pondasi", value=True)
-    h_cor = st.sidebar.number_input("AHSP Beton (Rp/m³)", value=4500000) if show_cor else 0
-    show_besi = st.sidebar.checkbox("Pembesian Pondasi", value=True)
-    r_besi = st.sidebar.number_input("Rasio Besi (kg/m³)", value=150) if show_besi else 0
-    h_besi = st.sidebar.number_input("AHSP Besi (Rp/kg)", value=18500) if show_besi else 0
+    show_galian = st.sidebar.checkbox("Galian Tanah Pondasi", value=True, key="5_cb_gal")
+    h_galian = st.sidebar.number_input("AHSP Galian (Rp/m³)", value=75000, key="5_h_gal") if show_galian else 0
+    show_lc = st.sidebar.checkbox("Lantai Kerja Pondasi", value=True, key="5_cb_lc")
+    h_lc = st.sidebar.number_input("AHSP Lantai Kerja (Rp/m³)", value=950000, key="5_h_lc") if show_lc else 0
+    show_bekisting = st.sidebar.checkbox("Bekisting Plat Pondasi", value=True, key="5_cb_bek")
+    h_bekisting = st.sidebar.number_input("AHSP Bekisting (Rp/m²)", value=145000, key="5_h_bek") if show_bekisting else 0
+    show_cor = st.sidebar.checkbox("Beton Plat Pondasi", value=True, key="5_cb_cor")
+    h_cor = st.sidebar.number_input("AHSP Beton (Rp/m³)", value=4500000, key="5_h_cor") if show_cor else 0
+    show_besi = st.sidebar.checkbox("Pembesian Pondasi", value=True, key="5_cb_besi")
+    r_besi = st.sidebar.number_input("Rasio Besi (kg/m³)", value=150, key="5_r_besi") if show_besi else 0
+    h_besi = st.sidebar.number_input("AHSP Besi (Rp/kg)", value=18500, key="5_h_besi") if show_besi else 0
 
     if show_galian: item_to_add.append(["Galian Tanah Pondasi", (p+0.4)*(l+0.4)*t*jml, "m³", h_galian])
     if show_lc: item_to_add.append(["Lantai Kerja Pondasi", p*l*0.05*jml, "m³", h_lc])
@@ -285,28 +287,28 @@ elif jenis_bangunan == "5. Pondasi Telapak":
 # =====================================================================
 elif jenis_bangunan == "6. Dinding Penahan Tanah (Kantilever)":
     st.sidebar.header("Dimensi DPT")
-    h = st.sidebar.number_input("Tinggi Dinding (m)", value=4.0)
-    l_base = st.sidebar.number_input("Lebar Base (m)", value=2.5)
-    panjang = st.sidebar.number_input("Panjang DPT (m)", value=50.0)
+    h = st.sidebar.number_input("Tinggi Dinding (m)", value=4.0, key="6_h")
+    l_base = st.sidebar.number_input("Lebar Base (m)", value=2.5, key="6_lb")
+    panjang = st.sidebar.number_input("Panjang DPT (m)", value=50.0, key="6_p")
     vol_beton = ((0.4 * h) + (l_base * 0.4)) * panjang
 
     st.sidebar.header("Pekerjaan & AHSP")
     if mode_proyek != "Bangunan Baru":
-        show_bongkar = st.sidebar.checkbox("Bongkaran DPT Eksisting", value=True)
-        h_bongkar = st.sidebar.number_input("AHSP Bongkaran (Rp/m³)", value=350000) if show_bongkar else 0
+        show_bongkar = st.sidebar.checkbox("Bongkaran DPT Eksisting", value=True, key="6_cb_bongk")
+        h_bongkar = st.sidebar.number_input("AHSP Bongkaran (Rp/m³)", value=350000, key="6_h_bongk") if show_bongkar else 0
         if show_bongkar: item_to_add.append(["Bongkaran DPT Eksisting", vol_beton, "m³", h_bongkar])
 
-    show_galian = st.sidebar.checkbox("Galian Struktur DPT", value=True)
-    h_galian = st.sidebar.number_input("AHSP Galian (Rp/m³)", value=75000) if show_galian else 0
-    show_bekisting = st.sidebar.checkbox("Bekisting DPT", value=True)
-    h_bekisting = st.sidebar.number_input("AHSP Bekisting (Rp/m²)", value=145000) if show_bekisting else 0
-    show_cor = st.sidebar.checkbox("Pengecoran Beton DPT", value=True)
-    h_cor = st.sidebar.number_input("AHSP Beton (Rp/m³)", value=4200000) if show_cor else 0
-    show_besi = st.sidebar.checkbox("Pembesian Struktur DPT", value=True)
-    r_besi = st.sidebar.number_input("Rasio Besi (kg/m³)", value=125) if show_besi else 0
-    h_besi = st.sidebar.number_input("AHSP Besi (Rp/kg)", value=18500) if show_besi else 0
-    show_timbunan = st.sidebar.checkbox("Timbunan Tanah Kembali", value=True)
-    h_timbunan = st.sidebar.number_input("AHSP Timbunan (Rp/m³)", value=115000) if show_timbunan else 0
+    show_galian = st.sidebar.checkbox("Galian Struktur DPT", value=True, key="6_cb_gal")
+    h_galian = st.sidebar.number_input("AHSP Galian (Rp/m³)", value=75000, key="6_h_gal") if show_galian else 0
+    show_bekisting = st.sidebar.checkbox("Bekisting DPT", value=True, key="6_cb_bek")
+    h_bekisting = st.sidebar.number_input("AHSP Bekisting (Rp/m²)", value=145000, key="6_h_bek") if show_bekisting else 0
+    show_cor = st.sidebar.checkbox("Pengecoran Beton DPT", value=True, key="6_cb_cor")
+    h_cor = st.sidebar.number_input("AHSP Beton (Rp/m³)", value=4200000, key="6_h_cor") if show_cor else 0
+    show_besi = st.sidebar.checkbox("Pembesian Struktur DPT", value=True, key="6_cb_besi")
+    r_besi = st.sidebar.number_input("Rasio Besi (kg/m³)", value=125, key="6_r_besi") if show_besi else 0
+    h_besi = st.sidebar.number_input("AHSP Besi (Rp/kg)", value=18500, key="6_h_besi") if show_besi else 0
+    show_timbunan = st.sidebar.checkbox("Timbunan Tanah Kembali", value=True, key="6_cb_timb")
+    h_timbunan = st.sidebar.number_input("AHSP Timbunan (Rp/m³)", value=115000, key="6_h_timb") if show_timbunan else 0
 
     if show_galian: item_to_add.append(["Galian Struktur DPT", l_base * 1.0 * panjang, "m³", h_galian])
     if show_bekisting: item_to_add.append(["Bekisting DPT", (h*2*panjang) + (0.4*2*panjang), "m²", h_bekisting])
@@ -324,9 +326,9 @@ elif jenis_bangunan == "6. Dinding Penahan Tanah (Kantilever)":
 # =====================================================================
 elif jenis_bangunan == "7. Pondasi Bore Pile":
     st.sidebar.header("Dimensi Bore Pile")
-    diameter = st.sidebar.number_input("Diameter Pile (m)", value=0.6)
-    kedalaman = st.sidebar.number_input("Kedalaman Pile (m)", value=12.0)
-    jml_titik = st.sidebar.number_input("Jumlah Titik", value=20, step=1)
+    diameter = st.sidebar.number_input("Diameter Pile (m)", value=0.6, key="7_d")
+    kedalaman = st.sidebar.number_input("Kedalaman Pile (m)", value=12.0, key="7_ked")
+    jml_titik = st.sidebar.number_input("Jumlah Titik", value=20, step=1, key="7_jml")
     
     area = np.pi * (diameter / 2)**2
     vol_total_beton = area * kedalaman * jml_titik
@@ -334,19 +336,19 @@ elif jenis_bangunan == "7. Pondasi Bore Pile":
 
     st.sidebar.header("Pekerjaan & AHSP")
     if mode_proyek == "Rehabilitasi Struktur":
-        show_bongkar = st.sidebar.checkbox("Pembersihan Lokasi/Bongkar Kepala", value=True)
-        h_bongkar = st.sidebar.number_input("AHSP Pembersihan (Rp/Titik)", value=500000) if show_bongkar else 0
+        show_bongkar = st.sidebar.checkbox("Pembersihan Lokasi/Bongkar Kepala", value=True, key="7_cb_bongk")
+        h_bongkar = st.sidebar.number_input("AHSP Pembersihan (Rp/Titik)", value=500000, key="7_h_bongk") if show_bongkar else 0
         if show_bongkar: item_to_add.append(["Pembersihan Lokasi/Bongkar Kepala Pile", jml_titik, "Titik", h_bongkar])
 
-    show_bor = st.sidebar.checkbox("Pengeboran Bore Pile", value=True)
-    h_bor = st.sidebar.number_input("AHSP Pengeboran (Rp/m³)", value=450000) if show_bor else 0
-    show_casing = st.sidebar.checkbox("Instalasi Temporary Casing", value=True)
-    h_casing = st.sidebar.number_input("AHSP Casing (Rp/m')", value=150000) if show_casing else 0
-    show_cor = st.sidebar.checkbox("Pengecoran Beton K-350", value=True)
-    h_cor = st.sidebar.number_input("AHSP Beton (Rp/m³)", value=1350000) if show_cor else 0
-    show_besi = st.sidebar.checkbox("Pembesian Tulangan", value=True)
-    r_besi = st.sidebar.number_input("Rasio Besi (kg/m³)", value=180) if show_besi else 0
-    h_besi = st.sidebar.number_input("AHSP Besi (Rp/kg)", value=18500) if show_besi else 0
+    show_bor = st.sidebar.checkbox("Pengeboran Bore Pile", value=True, key="7_cb_bor")
+    h_bor = st.sidebar.number_input("AHSP Pengeboran (Rp/m³)", value=450000, key="7_h_bor") if show_bor else 0
+    show_casing = st.sidebar.checkbox("Instalasi Temporary Casing", value=True, key="7_cb_cas")
+    h_casing = st.sidebar.number_input("AHSP Casing (Rp/m')", value=150000, key="7_h_cas") if show_casing else 0
+    show_cor = st.sidebar.checkbox("Pengecoran Beton K-350", value=True, key="7_cb_cor")
+    h_cor = st.sidebar.number_input("AHSP Beton (Rp/m³)", value=1350000, key="7_h_cor") if show_cor else 0
+    show_besi = st.sidebar.checkbox("Pembesian Tulangan", value=True, key="7_cb_besi")
+    r_besi = st.sidebar.number_input("Rasio Besi (kg/m³)", value=180, key="7_r_besi") if show_besi else 0
+    h_besi = st.sidebar.number_input("AHSP Besi (Rp/kg)", value=18500, key="7_h_besi") if show_besi else 0
 
     if show_bor: item_to_add.append(["Pengeboran Bore Pile", vol_pengeboran, "m³", h_bor])
     if show_casing: item_to_add.append(["Instalasi Temporary Casing", diameter * 2 * jml_titik, "m'", h_casing])
@@ -373,29 +375,30 @@ for item in item_to_add:
 
 st.info(f"Sub-Total Item Ini: Rp {subtotal_now:,.0f}")
 
-if st.button("TAMBAHKAN KE MASTER REKAP", use_container_width=True):
-    for item in item_to_add:
-        st.session_state.rekap_proyek.append({
-            "Kategori": kategori_pekerjaan, "Pekerjaan": item[0],
-            "Volume": round(item[1], 2), "Satuan": item[2],
-            "AHSP": item[3], "Total": item[1] * item[3]
-        })
-    st.success("Data berhasil ditambahkan ke tabel RAB di bawah.")
+if len(item_to_add) > 0:
+    if st.button("TAMBAHKAN KE MASTER REKAP", use_container_width=True):
+        for item in item_to_add:
+            st.session_state.rekap_proyek.append({
+                "Kategori": kategori_pekerjaan, "Pekerjaan": item[0],
+                "Volume": round(item[1], 2), "Satuan": item[2],
+                "AHSP": item[3], "Total": item[1] * item[3]
+            })
+        st.success("Data berhasil ditambahkan ke tabel RAB di bawah.")
 
 st.write("---")
 st.pyplot(fig)
 
 # =====================================================================
-# MASTER RAB FINAL
+# MASTER RAB FINAL & FITUR EDIT DATA
 # =====================================================================
 st.divider()
-st.header("Laporan Rekapitulasi Anggaran Biaya")
+st.header("Laporan Rencana Anggaran Biaya (RAB)")
 
 if st.session_state.rekap_proyek:
     
     # --- FITUR EDIT ---
     with st.expander("✏️ Manajemen Data (Edit & Hapus Item)"):
-        st.info("Edit kolom **Pekerjaan, Volume, atau AHSP**. Untuk menghapus item, centang kotak di sebelah kiri baris, lalu tekan tombol `Delete` (tong sampah) di kanan atas tabel ini.")
+        st.info("Edit kolom **Pekerjaan, Volume, atau AHSP**. Untuk menghapus item, centang kotak di sebelah kiri baris, lalu tekan icon `Delete` (tong sampah) di pojok kanan atas tabel ini.")
         df_raw = pd.DataFrame(st.session_state.rekap_proyek)
         edited_df = st.data_editor(
             df_raw,
@@ -404,7 +407,8 @@ if st.session_state.rekap_proyek:
                 "Total": st.column_config.Column(disabled=True)
             },
             num_rows="dynamic",
-            use_container_width=True
+            use_container_width=True,
+            key="editor_tabel"
         )
         
         if st.button("💾 Simpan Perubahan Data"):
@@ -443,6 +447,7 @@ if st.session_state.rekap_proyek:
     st.metric("GRAND TOTAL KONTRAK", f"Rp {total_akhir:,.0f}")
 
     if st.button("Kosongkan Master Rekap", use_container_width=True):
-        st.session_state.rekap_proyek = []; st.rerun()
+        st.session_state.rekap_proyek = []
+        st.rerun()
 else:
     st.info("Belum ada data di rekapitulasi.")
