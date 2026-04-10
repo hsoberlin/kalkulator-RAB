@@ -1,7 +1,7 @@
 import streamlit as st
 import numpy as np
 import pandas as pd
-import matplotlib.subplots as plt
+import matplotlib.pyplot as plt
 import io
 import json # Modul baru untuk menyimpan dan membuka Draft
 
