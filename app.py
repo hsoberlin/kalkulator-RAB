@@ -371,62 +371,42 @@ elif jenis_bangunan == "7. Pondasi Bore Pile":
 # =====================================================================
 if st.session_state.rekap_proyek:
     st.sidebar.divider()
-    st.sidebar.header("✏️ Edit/Hapus Item Tersimpan")
-    st.sidebar.write("Pilih item dari Laporan RAB untuk mengubah Volume atau AHSP.")
+    st.sidebar.header("✏️ Edit Item Tersimpan")
+    st.sidebar.write("Pilih item di bawah ini untuk mengubah Volume atau AHSP-nya:")
     
-    opsi_edit = [f"{i}. {item['Pekerjaan']} ({item['Kategori'].split('.')[0]})" for i, item in enumerate(st.session_state.rekap_proyek)]
-    pilihan_edit = st.sidebar.selectbox("Pilih Item:", opsi_edit, key="select_edit")
+    # Tambahkan opsi default agar tidak langsung merender edit form pertama kali
+    opsi_edit = [f"{i+1}. {item['Pekerjaan']} ({item['Kategori'].split('.')[0]})" for i, item in enumerate(st.session_state.rekap_proyek)]
+    pilihan_edit = st.sidebar.selectbox("Pilih Item:", ["-- Pilih Item --"] + opsi_edit, key="select_edit")
     
-    if pilihan_edit:
-        idx_edit = int(pilihan_edit.split(".")[0])
+    if pilihan_edit != "-- Pilih Item --":
+        # Kurangi 1 karena indeks python dimulai dari 0
+        idx_edit = int(pilihan_edit.split(".")[0]) - 1
         item_terpilih = st.session_state.rekap_proyek[idx_edit]
         
-        val_vol = st.sidebar.number_input(f"Edit Volume ({item_terpilih['Satuan']})", value=float(item_terpilih['Volume']), key="edit_vol")
-        val_ahsp = st.sidebar.number_input("Edit AHSP (Rp)", value=float(item_terpilih['AHSP']), key="edit_ahsp")
+        st.sidebar.info(f"Kategori: **{item_terpilih['Kategori']}**")
+        val_vol = st.sidebar.number_input(f"Ubah Volume ({item_terpilih['Satuan']})", value=float(item_terpilih['Volume']), key="edit_vol")
+        val_ahsp = st.sidebar.number_input("Ubah AHSP (Rp)", value=float(item_terpilih['AHSP']), key="edit_ahsp")
         
         col_e1, col_e2 = st.sidebar.columns(2)
         with col_e1:
-            if st.button("💾 Update", key="btn_update"):
+            if st.button("💾 Update Data", key="btn_update"):
                 st.session_state.rekap_proyek[idx_edit]['Volume'] = val_vol
                 st.session_state.rekap_proyek[idx_edit]['AHSP'] = val_ahsp
                 st.session_state.rekap_proyek[idx_edit]['Total'] = val_vol * val_ahsp
-                st.success("Diperbarui!")
+                st.success("Data Diperbarui!")
                 st.rerun()
         with col_e2:
-            if st.button("🗑️ Hapus", key="btn_hapus"):
+            if st.button("🗑️ Hapus Item", key="btn_hapus"):
                 st.session_state.rekap_proyek.pop(idx_edit)
-                st.success("Dihapus!")
+                st.success("Data Dihapus!")
                 st.rerun()
 
-# =====================================================================
-# MANAJEMEN DRAFT PROYEK (SAVE/LOAD) DI SIDEBAR BAWAH
-# =====================================================================
-st.sidebar.divider()
-st.sidebar.header("📁 Manajemen Draft Proyek")
-
-# 1. Upload Draft (Buka File .json)
-uploaded_file = st.sidebar.file_uploader("Buka Draft RAB (.json)", type="json")
-if uploaded_file is not None:
-    if st.sidebar.button("📂 Muat File Draft Ini", use_container_width=True):
-        try:
-            draft_data = json.load(uploaded_file)
-            st.session_state.rekap_proyek = draft_data
-            st.sidebar.success("Draft berhasil dimuat!")
+        st.sidebar.write("---")
+        st.sidebar.write("Ingin mengubah Dimensi (Panjang/Lebar/Tinggi)?")
+        # Tombol lompat ke menu kategori yang sesuai
+        if st.sidebar.button(f"➡️ Pindah ke Menu {item_terpilih['Kategori'].split('.')[0]}", use_container_width=True):
+            st.session_state.navigasi_utama = item_terpilih['Kategori']
             st.rerun()
-        except Exception as e:
-            st.sidebar.error("File draft tidak valid atau rusak.")
-
-# 2. Download Draft (Simpan ke .json)
-if st.session_state.rekap_proyek:
-    draft_json = json.dumps(st.session_state.rekap_proyek, indent=4)
-    st.sidebar.download_button(
-        label="💾 Simpan Draft Proyek (.json)",
-        data=draft_json,
-        file_name="Draft_RAB_Pemeliharaan_Sipil.json",
-        mime="application/json",
-        use_container_width=True
-    )
-    st.sidebar.info("Gunakan file `.json` ini untuk melanjutkan perhitungan Anda besok hari.")
 
 # =====================================================================
 # TAMPILAN PREVIEW & REKAP (PORTRAIT HP)
