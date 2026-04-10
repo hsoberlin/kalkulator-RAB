@@ -5,14 +5,12 @@ import matplotlib.pyplot as plt
 
 st.set_page_config(page_title="Estimator Proyek Terpadu", layout="wide")
 
-# --- INISIALISASI SESSION STATE UNTUK REKAP ---
 if 'rekap_proyek' not in st.session_state:
     st.session_state.rekap_proyek = []
 
 st.title("🏗️ Kalkulator Volume & Biaya Konstruksi Terpadu")
 st.write("Hitung detail per item pekerjaan, visualisasikan, dan tambahkan ke Master Rekapitulasi Proyek.")
 
-# --- SIDEBAR MENU UTAMA ---
 st.sidebar.title("Navigasi Proyek")
 jenis_bangunan = st.sidebar.selectbox(
     "Pilih Jenis Pekerjaan:",
@@ -21,15 +19,15 @@ jenis_bangunan = st.sidebar.selectbox(
         "2. Saluran Pasangan Batu (Drainase)",
         "3. Jalan Perkerasan Lentur (Aspal)", 
         "4. Jalan Perkerasan Kaku (Rigid)",
-        "5. Pondasi Telapak"
+        "5. Pondasi Telapak",
+        "6. Dinding Penahan Tanah (Kantilever)"
     ]
 )
 
 st.sidebar.divider()
 
-# Variabel sementara penampung data untuk dimasukkan ke rekap
 item_to_add = []
-kategori_pekerjaan = jenis_bangunan.split(". ")[1] # Mengambil nama setelah angka
+kategori_pekerjaan = jenis_bangunan.split(". ")[1]
 
 # =====================================================================
 # 1. LOGIKA SALURAN TRAPESIUM (BETON)
@@ -62,7 +60,6 @@ if jenis_bangunan == "1. Saluran Trapesium (Beton)":
     if show_galian: item_to_add.append(["Galian Tanah", vol_tanah, "m³", h_galian])
     if show_cor: item_to_add.append(["Pengecoran Beton", vol_beton, "m³", h_cor])
 
-    # Visualisasi
     fig, ax = plt.subplots()
     x_coords = [0, dist, dist + lebar_bawah, lebar_atas]
     y_coords = [0, -tinggi, -tinggi, 0]
@@ -95,7 +92,7 @@ elif jenis_bangunan == "2. Saluran Pasangan Batu (Drainase)":
     dist = (lebar_atas - lebar_bawah) / 2
     keliling_dalam = (2 * np.sqrt(dist**2 + tinggi**2)) + lebar_bawah
     
-    vol_galian = (((lebar_atas+(2*tebar_batu)) + (lebar_bawah+(2*tebar_batu)))/2 * (tinggi+tebal_batu)) * panjang
+    vol_galian = (((lebar_atas+(2*tebal_batu)) + (lebar_bawah+(2*tebal_batu)))/2 * (tinggi+tebal_batu)) * panjang
     vol_batu = keliling_dalam * tebal_batu * panjang
     luas_plesteran = keliling_dalam * panjang
 
@@ -164,7 +161,7 @@ elif jenis_bangunan == "4. Jalan Perkerasan Kaku (Rigid)":
 
     vol_lc = lebar * panjang * t_lc
     vol_rigid = lebar * panjang * t_rigid
-    luas_bekisting = (t_rigid + t_lc) * panjang * 2 # Sisi kiri & kanan
+    luas_bekisting = (t_rigid + t_lc) * panjang * 2
 
     if show_lc: item_to_add.append(["Lantai Kerja (Lean Concrete)", vol_lc, "m³", h_lc])
     if show_rigid: item_to_add.append(["Beton Rigid", vol_rigid, "m³", h_rigid])
@@ -210,6 +207,59 @@ elif jenis_bangunan == "5. Pondasi Telapak":
     ax.set_title("Pondasi Telapak")
 
 # =====================================================================
+# 6. LOGIKA DINDING PENAHAN TANAH (KANTILEVER)
+# =====================================================================
+elif jenis_bangunan == "6. Dinding Penahan Tanah (Kantilever)":
+    st.sidebar.header("📐 Dimensi Dinding Penahan")
+    tinggi_dinding = st.sidebar.number_input("Tinggi Dinding/Stem (m)", value=4.0)
+    tebal_atas = st.sidebar.number_input("Tebal Dinding Atas (m)", value=0.3)
+    tebal_bawah = st.sidebar.number_input("Tebal Dinding Bawah (m)", value=0.5)
+    lebar_pelat = st.sidebar.number_input("Lebar Pelat Dasar/Base (m)", value=2.5)
+    tebal_pelat = st.sidebar.number_input("Tebal Pelat Dasar (m)", value=0.4)
+    lebar_heel = st.sidebar.number_input("Lebar Heel (Belakang Dinding) (m)", value=1.2)
+    panjang_dpt = st.sidebar.number_input("Panjang Total Dinding (m)", value=50.0)
+
+    st.sidebar.header("🛠️ Pilih Pekerjaan & AHSP")
+    show_galian = st.sidebar.checkbox("Galian Tanah Dasar", value=True)
+    h_galian = st.sidebar.number_input("AHSP Galian (Rp/m³)", value=75000, step=5000) if show_galian else 0
+    
+    show_cor = st.sidebar.checkbox("Beton Bertulang (Dinding + Pelat)", value=True)
+    h_cor = st.sidebar.number_input("AHSP Beton Bertulang (Rp/m³)", value=4200000, step=50000) if show_cor else 0
+    
+    show_timbunan = st.sidebar.checkbox("Timbunan Kembali (Backfill)", value=True)
+    h_timbunan = st.sidebar.number_input("AHSP Timbunan Tanah (Rp/m³)", value=115000, step=5000) if show_timbunan else 0
+
+    # Perhitungan Volume
+    vol_beton_stem = ((tebal_atas + tebal_bawah) / 2 * tinggi_dinding) * panjang_dpt
+    vol_beton_base = (lebar_pelat * tebal_pelat) * panjang_dpt
+    vol_beton_total = vol_beton_stem + vol_beton_base
+    
+    vol_galian = (lebar_pelat + 0.5) * tebal_pelat * panjang_dpt # Asumsi galian dilebihkan
+    vol_timbunan = lebar_heel * tinggi_dinding * panjang_dpt # Tanah di atas heel
+
+    if show_galian: item_to_add.append(["Galian Tanah Struktur", vol_galian, "m³", h_galian])
+    if show_cor: item_to_add.append(["Pengecoran Beton DPT", vol_beton_total, "m³", h_cor])
+    if show_timbunan: item_to_add.append(["Timbunan Tanah (Backfill)", vol_timbunan, "m³", h_timbunan])
+
+    # Visualisasi
+    fig, ax = plt.subplots()
+    lebar_toe = lebar_pelat - lebar_heel - tebal_bawah
+    # Pelat Dasar (Base)
+    ax.add_patch(plt.Rectangle((0, -tebal_pelat), lebar_pelat, tebal_pelat, color='gray', label='Beton DPT'))
+    # Dinding (Stem)
+    x_stem = [lebar_toe, lebar_toe + tebal_bawah, lebar_toe + tebal_bawah - (tebal_bawah-tebal_atas), lebar_toe]
+    y_stem = [0, 0, tinggi_dinding, tinggi_dinding]
+    ax.fill(x_stem, y_stem, color='gray')
+    # Timbunan (Backfill)
+    ax.add_patch(plt.Rectangle((lebar_toe + tebal_bawah, 0), lebar_heel, tinggi_dinding, color='saddlebrown', alpha=0.4, label='Timbunan (Backfill)'))
+    
+    ax.set_xlim(-0.5, lebar_pelat + 0.5)
+    ax.set_ylim(-tebal_pelat - 0.5, tinggi_dinding + 0.5)
+    ax.set_aspect('equal')
+    ax.legend()
+    ax.set_title("Dinding Penahan Tanah Kantilever")
+
+# =====================================================================
 # PREVIEW & ADD BUTTON
 # =====================================================================
 col1, col2 = st.columns([1, 1])
@@ -232,8 +282,8 @@ with col1:
                     "Pekerjaan": nama,
                     "Volume": round(vol, 2),
                     "Satuan": sat,
-                    "AHSP": ahsp,       # Disimpan sebagai angka asli
-                    "Total Biaya": vol * ahsp # Disimpan sebagai angka asli
+                    "AHSP": ahsp,
+                    "Total Biaya": vol * ahsp
                 })
             st.success("Berhasil ditambahkan!")
 
@@ -249,26 +299,21 @@ st.header("🛒 Master Rekapitulasi Proyek (RAB)")
 if st.session_state.rekap_proyek:
     df_rekap = pd.DataFrame(st.session_state.rekap_proyek)
     
-    # 1. Menampilkan Sub-Total per Kategori
     st.subheader("📊 Rekapitulasi per Jenis Pekerjaan")
     summary_df = df_rekap.groupby('Kategori')['Total Biaya'].sum().reset_index()
     
-    # Membuat kolom dinamis sesuai jumlah kategori yang ada
     cols = st.columns(len(summary_df))
     for index, row in summary_df.iterrows():
         cols[index].metric(label=f"Total {row['Kategori']}", value=f"Rp {row['Total Biaya']:,.0f}")
     
     st.write("---")
-    
-    # 2. Menampilkan Tabel Detail
     st.subheader("📋 Detail Rincian Anggaran")
-    # Salin DataFrame agar angka asli tidak rusak saat di-format ke mata uang
+    
     df_display = df_rekap.copy()
     df_display["AHSP"] = df_display["AHSP"].map("Rp {:,.0f}".format)
     df_display["Total Biaya"] = df_display["Total Biaya"].map("Rp {:,.0f}".format)
     st.dataframe(df_display, use_container_width=True)
     
-    # 3. Grand Total Keseluruhan
     grand_total = df_rekap["Total Biaya"].sum()
     st.metric("💰 GRAND TOTAL KESELURUHAN", f"Rp {grand_total:,.0f}")
     
