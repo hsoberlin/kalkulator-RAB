@@ -4,12 +4,12 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import json
 import streamlit_authenticator as stauth
-from streamlit_authenticator.utilities.hasher import Hasher # KOREKSI: Import Hasher versi terbaru
+from streamlit_authenticator.utilities.hasher import Hasher
 
 # Konfigurasi Portrait untuk HP (Tema Elegan & Bersih)
 st.set_page_config(page_title="Estimator RAB SGL", layout="centered")
 
-# CSS Kustom untuk menyembunyikan elemen bawaan Streamlit
+# CSS Kustom untuk menyembunyikan elemen bawaan Streamlit & Memperbaiki Kontras Warna
 st.markdown("""
     <style>
         /* Mengubah Warna Dasar Aplikasi */
@@ -34,9 +34,15 @@ st.markdown("""
             border-color: #1E3A8A !important;
         }
         
-        /* Warna label input */
+        /* Warna label input utama */
         .stTextInput>label, .stNumberInput>label, .stSelectbox>label, .stRadio>label, .stSlider>label {
             color: #8892B0 !important;
+        }
+
+        /* PERBAIKAN 1: Warna teks opsi Radio (Bangunan Baru) dan Checkbox agar putih terang */
+        .stRadio div[role="radiogroup"] label div p, 
+        .stCheckbox label span {
+            color: #E6F1FF !important; 
         }
 
         /* Styling Tombol UTAMA */
@@ -71,11 +77,13 @@ st.markdown("""
             border: 1px solid #1E3A8A;
         }
         
-        /* Styling Info/Success/Warning Box */
+        /* PERBAIKAN 3: Styling Info/Success/Warning Box agar teks di dalamnya putih kontras */
         .stAlert {
             background-color: #112240 !important;
-            color: var(--text-color) !important;
             border: 1px solid var(--primary-color) !important;
+        }
+        .stAlert p, .stAlert div {
+            color: #E6F1FF !important;
         }
 
         /* Menyembunyikan elemen bawaan Streamlit */
@@ -96,10 +104,9 @@ names = ['Pemeliharaan Sipil SGL']
 usernames = ['harsipilsgl']
 passwords_asli = ['harsipilsgl_2026']
 
-# Mengunci proses enkripsi agar password tidak ter-reset
 @st.cache_data
 def get_hashed_passwords(passwords):
-    return Hasher(passwords).generate() # KOREKSI: Pemanggilan Hasher yang benar
+    return Hasher(passwords).generate()
 
 hashed_passwords = get_hashed_passwords(passwords_asli)
 
@@ -177,7 +184,8 @@ if authentication_status:
     # LOGIKA 0. PEKERJAAN PERSIAPAN
     # =====================================================================
     if jenis_bangunan == "0. Pekerjaan Persiapan":
-        st.markdown("**Item Persiapan (Lump Sum)**")
+        # PERBAIKAN 2: Penamaan label input
+        st.markdown("**Input Item Persiapan (Lump Sum)**")
         
         show_survey = st.checkbox("Survey, Pengukuran & Pasang Bowplank", value=True, key="0_cb_surv")
         h_survey = st.number_input("Biaya Survey (Rp)", value=5000000, key="0_h_surv") if show_survey else 0
@@ -204,7 +212,7 @@ if authentication_status:
     # LOGIKA 1. SALURAN TRAPESIUM (BETON)
     # =====================================================================
     elif jenis_bangunan == "1. Saluran Trapesium (Beton)":
-        st.markdown("**Dimensi Saluran**")
+        st.markdown("**Input Dimensi Saluran**")
         l_atas = st.number_input("Lebar Dalam Atas (m)", value=1.2, key="1_la")
         l_bawah = st.number_input("Lebar Dalam Bawah (m)", value=0.8, key="1_lb")
         tinggi = st.number_input("Tinggi Saluran (m)", value=5.0, key="1_t")
@@ -219,7 +227,7 @@ if authentication_status:
         vol_tanah = (((l_atas+(2*t_atas) + l_bawah+(2*t_bawah))/2) * (tinggi+t_dasar)) * panjang
         vol_rongga = (((l_atas + l_bawah) / 2) * tinggi) * panjang
 
-        st.markdown("**Pekerjaan & AHSP**")
+        st.markdown("**Input Pekerjaan & AHSP**")
         if mode_proyek == "Bangunan Baru":
             show_galian = st.checkbox("Galian Tanah Profil", value=True, key="1_cb_gal")
             h_galian = st.number_input("AHSP Galian (Rp/m³)", value=75000, key="1_h_gal") if show_galian else 0
@@ -255,7 +263,7 @@ if authentication_status:
     # LOGIKA 2. SALURAN PASANGAN BATU
     # =====================================================================
     elif jenis_bangunan == "2. Saluran Pasangan Batu (Drainase)":
-        st.markdown("**Dimensi Drainase**")
+        st.markdown("**Input Dimensi Drainase**")
         l_atas = st.number_input("Lebar Atas (m)", value=1.0, key="2_la")
         l_bawah = st.number_input("Lebar Bawah (m)", value=0.6, key="2_lb")
         tinggi = st.number_input("Tinggi (m)", value=1.2, key="2_t")
@@ -266,7 +274,7 @@ if authentication_status:
         keliling = (2 * np.sqrt(dist**2 + tinggi**2)) + l_bawah
         vol_batu = keliling * tebal * panjang
 
-        st.markdown("**Pekerjaan & AHSP**")
+        st.markdown("**Input Pekerjaan & AHSP**")
         if mode_proyek == "Bangunan Baru":
             vol_galian = (((l_atas+(2*tebal)) + (l_bawah+(2*tebal)))/2 * (tinggi+tebal)) * panjang
             show_galian = st.checkbox("Galian Tanah Drainase", value=True, key="2_cb_gal")
@@ -294,13 +302,13 @@ if authentication_status:
     # LOGIKA 3. JALAN PERKERASAN LENTUR (ASPAL)
     # =====================================================================
     elif jenis_bangunan == "3. Jalan Perkerasan Lentur (Aspal)":
-        st.markdown("**Dimensi Jalan**")
+        st.markdown("**Input Dimensi Jalan**")
         lebar = st.number_input("Lebar (m)", value=6.0, key="3_l")
         panjang = st.number_input("Panjang (m)", value=1000.0, key="3_p")
         t_aspal = st.number_input("Tebal Aspal (m)", value=0.05, key="3_tasp")
         t_base = st.number_input("Tebal Agregat (m)", value=0.15, key="3_tbase")
 
-        st.markdown("**Pekerjaan & AHSP**")
+        st.markdown("**Input Pekerjaan & AHSP**")
         if mode_proyek == "Bangunan Baru":
             show_grading = st.checkbox("Penyiapan Badan Jalan", value=True, key="3_cb_grad")
             h_grading = st.number_input("AHSP Penyiapan (Rp/m²)", value=12000, key="3_h_grad") if show_grading else 0
@@ -329,13 +337,13 @@ if authentication_status:
     # LOGIKA 4. JALAN PERKERASAN KAKU (RIGID)
     # =====================================================================
     elif jenis_bangunan == "4. Jalan Perkerasan Kaku (Rigid)":
-        st.markdown("**Dimensi Rigid**")
+        st.markdown("**Input Dimensi Rigid**")
         lebar = st.number_input("Lebar (m)", value=5.0, key="4_l")
         panjang = st.number_input("Panjang (m)", value=500.0, key="4_p")
         t_rigid = st.number_input("Tebal Rigid (m)", value=0.25, key="4_trig")
         t_lc = st.number_input("Tebal Lantai Kerja (m)", value=0.10, key="4_tlc")
 
-        st.markdown("**Pekerjaan & AHSP**")
+        st.markdown("**Input Pekerjaan & AHSP**")
         if mode_proyek == "Bangunan Baru":
             show_grading = st.checkbox("Penyiapan Badan Jalan", value=True, key="4_cb_grad")
             h_grading = st.number_input("AHSP Penyiapan (Rp/m²)", value=12000, key="4_h_grad") if show_grading else 0
@@ -370,14 +378,14 @@ if authentication_status:
     # LOGIKA 5. PONDASI TELAPAK
     # =====================================================================
     elif jenis_bangunan == "5. Pondasi Telapak":
-        st.markdown("**Dimensi Pondasi**")
+        st.markdown("**Input Dimensi Pondasi**")
         p = st.number_input("Panjang Plat (m)", value=1.5, key="5_p")
         l = st.number_input("Lebar Plat (m)", value=1.5, key="5_l")
         t = st.number_input("Tebal Plat (m)", value=0.3, key="5_t")
         jml = st.number_input("Jumlah Titik", value=10, key="5_jml")
         vol_beton = p * l * t * jml
 
-        st.markdown("**Pekerjaan & AHSP**")
+        st.markdown("**Input Pekerjaan & AHSP**")
         if mode_proyek != "Bangunan Baru":
             p_bongkar = st.slider("Persen Bongkaran (%)", 0, 100, 100, key="5_sl_bongk")
             show_bongkar = st.checkbox("Bongkaran Struktur Lama", value=True, key="5_cb_bongk")
@@ -410,13 +418,13 @@ if authentication_status:
     # LOGIKA 6. DINDING PENAHAN TANAH (DPT)
     # =====================================================================
     elif jenis_bangunan == "6. Dinding Penahan Tanah (Kantilever)":
-        st.markdown("**Dimensi DPT**")
+        st.markdown("**Input Dimensi DPT**")
         h = st.number_input("Tinggi Dinding (m)", value=4.0, key="6_h")
         l_base = st.number_input("Lebar Base (m)", value=2.5, key="6_lb")
         panjang = st.number_input("Panjang DPT (m)", value=50.0, key="6_p")
         vol_beton = ((0.4 * h) + (l_base * 0.4)) * panjang
 
-        st.markdown("**Pekerjaan & AHSP**")
+        st.markdown("**Input Pekerjaan & AHSP**")
         if mode_proyek != "Bangunan Baru":
             p_bongkar = st.slider("Persen Bongkaran (%)", 0, 100, 100, key="6_sl_bongk")
             show_bongkar = st.checkbox("Bongkaran DPT Eksisting", value=True, key="6_cb_bongk")
@@ -450,7 +458,7 @@ if authentication_status:
     # LOGIKA 7. PONDASI BORE PILE
     # =====================================================================
     elif jenis_bangunan == "7. Pondasi Bore Pile":
-        st.markdown("**Dimensi Bore Pile**")
+        st.markdown("**Input Dimensi Bore Pile**")
         diameter = st.number_input("Diameter Pile (m)", value=0.6, key="7_d")
         kedalaman = st.number_input("Kedalaman Pile (m)", value=12.0, key="7_ked")
         jml_titik = st.number_input("Jumlah Titik", value=20, step=1, key="7_jml")
@@ -459,7 +467,7 @@ if authentication_status:
         vol_total_beton = area * kedalaman * jml_titik
         vol_pengeboran = area * kedalaman * jml_titik
 
-        st.markdown("**Pekerjaan & AHSP**")
+        st.markdown("**Input Pekerjaan & AHSP**")
         if mode_proyek == "Rehabilitasi Struktur":
             p_bongkar = st.slider("Persen Titik Dibongkar (%)", 0, 100, 100, key="7_sl_bongk")
             show_bongkar = st.checkbox("Pembersihan Lokasi/Bongkar Kepala", value=True, key="7_cb_bongk")
@@ -636,4 +644,4 @@ elif authentication_status is False:
     st.error("Username atau Password salah. Silakan coba lagi.")
 elif authentication_status is None:
     st.warning("Silakan masukkan Username dan Password Anda.")
-    st.info("Aplikasi Internal Pemeliharaan Sipil SGL. Akses Dibatasi.")
+    st.info("Aplikasi Internal Pemeliharaan Sipil SGL. Akses Dibatasi. Tanpa Logo.")
