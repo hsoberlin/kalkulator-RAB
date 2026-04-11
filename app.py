@@ -4,16 +4,15 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import json # Modul untuk menyimpan dan membuka Draft
 
-# Konfigurasi Portrait untuk HP (Tema Elegan)
+# Konfigurasi Portrait untuk HP
 st.set_page_config(page_title="Estimator RAB SGL", layout="centered", initial_sidebar_state="auto")
 
-# CSS Kustom untuk membuat tampilan lebih bersih dan elegan di HP
+# CSS Kustom (Menghapus bagian yang menghilangkan Header agar tombol Sidebar di HP tetap muncul)
 st.markdown("""
     <style>
         .block-container { padding-top: 1.5rem; padding-bottom: 2rem; }
         #MainMenu {visibility: hidden;}
         footer {visibility: hidden;}
-        header {visibility: hidden;}
     </style>
 """, unsafe_allow_html=True)
 
