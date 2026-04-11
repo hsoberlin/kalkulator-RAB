@@ -9,7 +9,7 @@ from streamlit_authenticator.utilities.hasher import Hasher
 # Konfigurasi Portrait untuk HP (Tema Elegan & Bersih)
 st.set_page_config(page_title="Estimator RAB SGL", layout="centered")
 
-# CSS Kustom untuk menyembunyikan elemen bawaan Streamlit & Memperbaiki Kontras Warna
+# CSS Kustom untuk menyembunyikan elemen bawaan Streamlit & Memperbaiki Kontras Warna Teks
 st.markdown("""
     <style>
         /* Mengubah Warna Dasar Aplikasi */
@@ -34,15 +34,20 @@ st.markdown("""
             border-color: #1E3A8A !important;
         }
         
-        /* Warna label input utama */
+        /* Warna label input utama (Judul Inputan) */
         .stTextInput>label, .stNumberInput>label, .stSelectbox>label, .stSlider>label {
             color: #8892B0 !important;
         }
 
-        /* PERBAIKAN: Warna teks opsi Radio dan Checkbox (Item Pekerjaan) agar putih terang */
-        .stRadio div[role="radiogroup"] label p,
+        /* PERBAIKAN 1: Memaksa warna tulisan JUDUL st.radio (Metode Pelaksanaan:) agar putih kontras */
+        div[data-testid="stRadio"] > label {
+            color: #E6F1FF !important;
+            font-weight: bold;
+        }
+
+        /* PERBAIKAN 2: Memaksa warna tulisan OPSI di radio/checkbox agar putih terang kontras */
         .stRadio div[role="radiogroup"] label div p, 
-        .stCheckbox label p,
+        .stCheckbox label div p,
         .stCheckbox label span {
             color: #E6F1FF !important; 
         }
@@ -167,6 +172,7 @@ if authentication_status:
         key="navigasi_utama"
     )
 
+    # PERBAIKAN: Warna teks label metode pelaksanaan dijamin terbaca
     mode_proyek = st.radio(
         "Metode Pelaksanaan:", 
         ["Bangunan Baru", "Rehabilitasi Struktur"],
@@ -183,11 +189,12 @@ if authentication_status:
     kategori_pekerjaan = jenis_bangunan 
 
     # =====================================================================
-    # LOGIKA 1. PEKERJAAN PERSIAPAN
+    # LOGIKA 1. PEKERJAAN PERSIAPAN (Penomoran Direvisi jadi 1)
     # =====================================================================
     if jenis_bangunan == "1. Pekerjaan Persiapan":
         st.markdown("**Input Item Persiapan (Lump Sum)**")
         
+        # PERBAIKAN: Warna teks checkbox dan inputan dijamin kontras & kontinyu
         show_survey = st.checkbox("Survey, Pengukuran & Pasang Bowplank", value=True, key="1_cb_surv")
         h_survey = st.number_input("Biaya Survey (Rp)", value=5000000, key="1_h_surv") if show_survey else 0
 
@@ -257,6 +264,7 @@ if authentication_status:
 
         fig, ax = plt.subplots(figsize=(5, 3))
         ax.add_patch(plt.Rectangle((-2, -tinggi-1), 4, tinggi+2, color='saddlebrown', alpha=0.3))
+        # Sketsa garis warna putih agar kontras di dark mode
         ax.plot([-l_atas/2, -l_bawah/2, l_bawah/2, l_atas/2], [0, -tinggi, -tinggi, 0], color='white', lw=2)
         ax.set_aspect('equal')
 
@@ -290,7 +298,7 @@ if authentication_status:
         show_pasangan = st.checkbox("Pasangan Batu Kali (1:4)", value=True, key="3_cb_pas")
         h_pasangan = st.number_input("AHSP Pasangan Batu (Rp/m³)", value=950000, key="3_h_pas") if show_pasangan else 0
         show_plester = st.checkbox("Plesteran + Acian", value=True, key="3_cb_ples")
-        h_plester = st.number_input("AHSP Plesteran (Rp/m²)", value=65000, key="3_h_ples") if show_plester else 0
+        h_plester = st.number_input("AHSP Plesteran (Rp/m²)", value=65000, key="3_h_ples} else 0
 
         if show_pasangan: item_to_add.append(["Pasangan Batu Kali (1:4)", vol_batu, "m³", h_pasangan])
         if show_plester: item_to_add.append(["Plesteran + Acian", keliling * panjang, "m²", h_plester])
@@ -491,6 +499,7 @@ if authentication_status:
         if show_besi: item_to_add.append(["Pembesian Tulangan Bore Pile", vol_total_beton * r_besi, "kg", h_besi])
 
         fig, ax = plt.subplots(figsize=(5, 3))
+        # Tanah coklat alpha, pile abu-abu terang
         ax.add_patch(plt.Rectangle((-1, -kedalaman), 2, kedalaman, color='saddlebrown', alpha=0.2))
         ax.add_patch(plt.Rectangle((-diameter/2, -kedalaman), diameter, color='#A0A0A0'))
         ax.set_xlim(-1, 1); ax.set_ylim(-kedalaman-1, 1); ax.set_aspect('equal')
