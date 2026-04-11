@@ -34,22 +34,24 @@ st.markdown("""
             border-color: #1E3A8A !important;
         }
         
-        /* Warna label input utama (Judul Inputan) */
+        /* Warna label judul dropdown & number input */
         .stTextInput>label, .stNumberInput>label, .stSelectbox>label, .stSlider>label {
             color: #8892B0 !important;
         }
 
-        /* PERBAIKAN 1: Memaksa warna tulisan JUDUL st.radio (Metode Pelaksanaan:) agar putih kontras */
-        div[data-testid="stRadio"] > label {
+        /* PERBAIKAN: Memaksa SEMUA tulisan di Radio Button dan Checkbox menjadi putih terang */
+        div[role="radiogroup"] > label > div > p,
+        label[data-baseweb="checkbox"] > div > p,
+        label[data-baseweb="radio"] > div > p,
+        div[data-testid="stRadio"] > label > div > p,
+        .stCheckbox label p, .stRadio label p {
             color: #E6F1FF !important;
-            font-weight: bold;
+            font-weight: 500;
         }
-
-        /* PERBAIKAN 2: Memaksa warna tulisan OPSI di radio/checkbox agar putih terang kontras */
-        .stRadio div[role="radiogroup"] label div p, 
-        .stCheckbox label div p,
-        .stCheckbox label span {
-            color: #E6F1FF !important; 
+        
+        /* Memaksa Judul Radio (Metode Pelaksanaan:) agar kontras */
+        div[data-testid="stRadio"] > label {
+            color: #F1C40F !important;
         }
 
         /* Styling Tombol UTAMA */
@@ -73,18 +75,22 @@ st.markdown("""
             border: 1px solid var(--primary-color);
         }
 
-        /* Styling Expander */
+        /* Styling Expander (Menu Lipat) */
         .streamlit-expanderHeader {
             background-color: var(--secondary-background-color) !important;
             color: var(--primary-color) !important;
             border-radius: 5px;
+        }
+        .streamlit-expanderHeader p {
+            color: var(--primary-color) !important;
+            font-weight: bold;
         }
         .streamlit-expanderContent {
             background-color: #112240 !important;
             border: 1px solid #1E3A8A;
         }
         
-        /* Styling Info/Success/Warning Box agar teks di dalamnya putih kontras */
+        /* Styling Info Box agar teks di dalamnya putih kontras */
         .stAlert {
             background-color: #112240 !important;
             border: 1px solid var(--primary-color) !important;
@@ -113,7 +119,6 @@ passwords_asli = ['harsipilsgl_2026']
 
 @st.cache_data
 def get_hashed_passwords(passwords):
-    # KOREKSI: Pada versi terbaru, fungsinya adalah .hash(), bukan .generate()
     return Hasher(passwords).hash()
 
 hashed_passwords = get_hashed_passwords(passwords_asli)
@@ -173,7 +178,6 @@ if authentication_status:
         key="navigasi_utama"
     )
 
-    # PERBAIKAN: Warna teks label metode pelaksanaan dijamin terbaca
     mode_proyek = st.radio(
         "Metode Pelaksanaan:", 
         ["Bangunan Baru", "Rehabilitasi Struktur"],
@@ -190,12 +194,11 @@ if authentication_status:
     kategori_pekerjaan = jenis_bangunan 
 
     # =====================================================================
-    # LOGIKA 1. PEKERJAAN PERSIAPAN (Penomoran Direvisi jadi 1)
+    # LOGIKA 1. PEKERJAAN PERSIAPAN
     # =====================================================================
     if jenis_bangunan == "1. Pekerjaan Persiapan":
         st.markdown("**Input Item Persiapan (Lump Sum)**")
         
-        # PERBAIKAN: Warna teks checkbox dan inputan dijamin kontras & kontinyu
         show_survey = st.checkbox("Survey, Pengukuran & Pasang Bowplank", value=True, key="1_cb_surv")
         h_survey = st.number_input("Biaya Survey (Rp)", value=5000000, key="1_h_surv") if show_survey else 0
 
@@ -213,8 +216,11 @@ if authentication_status:
         if show_mob: item_to_add.append(["Mobilisasi & Demobilisasi", 1.0, "LS", h_mob])
         if show_direksi: item_to_add.append(["Fasilitas Proyek/Direksi Keet", 1.0, "LS", h_direksi])
 
+        # Gambar Diagram dummy untuk Persiapan
         fig, ax = plt.subplots(figsize=(4, 2))
-        ax.text(0.5, 0.5, 'Pekerjaan Persiapan & Umum\n(Non-Struktural)', horizontalalignment='center', verticalalignment='center', fontsize=12, fontweight='bold', color=plt.cm.get_cmap('YlOrBr')(0.5))
+        fig.patch.set_facecolor('#0A192F')
+        ax.set_facecolor('#0A192F')
+        ax.text(0.5, 0.5, 'Pekerjaan Persiapan & Umum\n(Non-Struktural)', horizontalalignment='center', verticalalignment='center', fontsize=12, fontweight='bold', color='#F1C40F')
         ax.set_axis_off()
 
     # =====================================================================
@@ -264,8 +270,9 @@ if authentication_status:
         if show_besi: item_to_add.append(["Pembesian Saluran", vol_beton * r_besi, "kg", h_besi])
 
         fig, ax = plt.subplots(figsize=(5, 3))
+        fig.patch.set_facecolor('#0A192F')
+        ax.set_facecolor('#0A192F')
         ax.add_patch(plt.Rectangle((-2, -tinggi-1), 4, tinggi+2, color='saddlebrown', alpha=0.3))
-        # Sketsa garis warna putih agar kontras di dark mode
         ax.plot([-l_atas/2, -l_bawah/2, l_bawah/2, l_atas/2], [0, -tinggi, -tinggi, 0], color='white', lw=2)
         ax.set_aspect('equal')
 
@@ -299,12 +306,15 @@ if authentication_status:
         show_pasangan = st.checkbox("Pasangan Batu Kali (1:4)", value=True, key="3_cb_pas")
         h_pasangan = st.number_input("AHSP Pasangan Batu (Rp/m³)", value=950000, key="3_h_pas") if show_pasangan else 0
         show_plester = st.checkbox("Plesteran + Acian", value=True, key="3_cb_ples")
+        # PERBAIKAN SYNTAX ERROR SEBELUMNYA DI SINI:
         h_plester = st.number_input("AHSP Plesteran (Rp/m²)", value=65000, key="3_h_ples") if show_plester else 0
 
         if show_pasangan: item_to_add.append(["Pasangan Batu Kali (1:4)", vol_batu, "m³", h_pasangan])
         if show_plester: item_to_add.append(["Plesteran + Acian", keliling * panjang, "m²", h_plester])
 
         fig, ax = plt.subplots(figsize=(5, 3))
+        fig.patch.set_facecolor('#0A192F')
+        ax.set_facecolor('#0A192F')
         ax.plot([0, dist, dist+l_bawah, l_atas], [0, -tinggi, -tinggi, 0], color='white', lw=3)
         ax.set_aspect('equal')
 
@@ -340,7 +350,9 @@ if authentication_status:
         if show_aspal: item_to_add.append(["Aspal Hotmix AC-WC", lebar * panjang * t_aspal, "m³", h_aspal])
 
         fig, ax = plt.subplots(figsize=(5, 3))
-        ax.add_patch(plt.Rectangle((0, -t_aspal), lebar, t_aspal, color='#000000'))
+        fig.patch.set_facecolor('#0A192F')
+        ax.set_facecolor('#0A192F')
+        ax.add_patch(plt.Rectangle((0, -t_aspal), lebar, t_aspal, color='#F1C40F')) # Kuning agar terlihat di background gelap
         ax.set_xlim(-1, lebar+1); ax.set_ylim(-0.2, 0.1); ax.set_aspect('equal')
 
     # =====================================================================
@@ -380,8 +392,10 @@ if authentication_status:
         if show_besi: item_to_add.append(["Pembesian (Dowel/Wiremesh)", (lebar * panjang * t_rigid) * r_besi, "kg", h_besi])
 
         fig, ax = plt.subplots(figsize=(5, 3))
+        fig.patch.set_facecolor('#0A192F')
+        ax.set_facecolor('#0A192F')
         ax.add_patch(plt.Rectangle((0, 0), lebar, t_rigid, color='#A0A0A0', hatch='//'))
-        ax.add_patch(plt.Rectangle((0, -t_lc), lebar, t_lc, color='#FFA500', alpha=0.5))
+        ax.add_patch(plt.Rectangle((0, -t_lc), lebar, t_lc, color='#F1C40F', alpha=0.5))
         ax.set_xlim(-1, lebar+1); ax.set_ylim(-0.3, 0.4); ax.set_aspect('equal')
 
     # =====================================================================
@@ -421,6 +435,8 @@ if authentication_status:
         if show_besi: item_to_add.append(["Pembesian Pondasi", vol_beton * r_besi, "kg", h_besi])
 
         fig, ax = plt.subplots(figsize=(5, 3))
+        fig.patch.set_facecolor('#0A192F')
+        ax.set_facecolor('#0A192F')
         ax.add_patch(plt.Rectangle((-p/2, 0), p, t, color='#A0A0A0'))
         ax.set_xlim(-1, 1); ax.set_ylim(-0.2, 0.5); ax.set_aspect('equal')
 
@@ -460,6 +476,8 @@ if authentication_status:
         if show_timbunan: item_to_add.append(["Timbunan Tanah Kembali", (l_base/2) * h * panjang, "m³", h_timbunan])
 
         fig, ax = plt.subplots(figsize=(5, 3))
+        fig.patch.set_facecolor('#0A192F')
+        ax.set_facecolor('#0A192F')
         ax.add_patch(plt.Rectangle((0, -0.4), l_base, 0.4, color='#A0A0A0'))
         ax.add_patch(plt.Rectangle((0.5, 0), 0.4, h, color='#A0A0A0'))
         ax.set_xlim(-0.5, l_base+0.5); ax.set_ylim(-1, h+1); ax.set_aspect('equal')
@@ -500,8 +518,9 @@ if authentication_status:
         if show_besi: item_to_add.append(["Pembesian Tulangan Bore Pile", vol_total_beton * r_besi, "kg", h_besi])
 
         fig, ax = plt.subplots(figsize=(5, 3))
-        # Tanah coklat alpha, pile abu-abu terang
-        ax.add_patch(plt.Rectangle((-1, -kedalaman), 2, kedalaman, color='saddlebrown', alpha=0.2))
+        fig.patch.set_facecolor('#0A192F')
+        ax.set_facecolor('#0A192F')
+        ax.add_patch(plt.Rectangle((-1, -kedalaman), 2, kedalaman, color='saddlebrown', alpha=0.3))
         ax.add_patch(plt.Rectangle((-diameter/2, -kedalaman), diameter, color='#A0A0A0'))
         ax.set_xlim(-1, 1); ax.set_ylim(-kedalaman-1, 1); ax.set_aspect('equal')
 
@@ -518,7 +537,7 @@ if authentication_status:
     for item in item_to_add:
         biaya = item[1] * item[3]
         subtotal_now += biaya
-        st.markdown(f"- **{item[0]}**<br><span style='color:#8892B0; font-size:14px'>{item[1]:,.2f} {item[2]} x Rp {item[3]:,.0f} = <b style='color:var(--primary-color)'>Rp {biaya:,.0f}</b></span>", unsafe_allow_html=True)
+        st.markdown(f"- **{item[0]}**<br><span style='color:#E6F1FF; font-size:14px'>{item[1]:,.2f} {item[2]} x Rp {item[3]:,.0f} = <b style='color:var(--primary-color)'>Rp {biaya:,.0f}</b></span>", unsafe_allow_html=True)
 
     st.info(f"**Sub-Total Rincian Ini: Rp {subtotal_now:,.0f}**")
 
