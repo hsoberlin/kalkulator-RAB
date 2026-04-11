@@ -2,13 +2,13 @@ import streamlit as st
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-import json # Modul untuk menyimpan dan membuka Draft
-import streamlit_authenticator as stauth # Modul Keamanan Login
+import json
+import streamlit_authenticator as stauth
 
 # Konfigurasi Portrait untuk HP (Tema Elegan & Bersih)
 st.set_page_config(page_title="Estimator RAB SGL", layout="centered")
 
-# CSS Kustom untuk menyembunyikan elemen bawaan Streamlit agar terasa seperti App Mobile Asli
+# CSS Kustom untuk menyembunyikan elemen bawaan Streamlit
 st.markdown("""
     <style>
         .block-container { padding-top: 1.5rem; padding-bottom: 2rem; }
@@ -19,24 +19,27 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # =====================================================================
-# SISTEM KEAMANAN (LOGIN)
+# SISTEM KEAMANAN (LOGIN) - PERBAIKAN
 # =====================================================================
 names = ['Bet', 'Badru', 'Zel', 'Frz', 'Ilmi', 'Vanhar']
 usernames = ['bet', 'badru', 'zel', 'frz', 'ilmi', 'vanhar']
 
-# Password yang sudah di-hash (dienkripsi)
-passwords = [
-    '$2b$12$R.3VqCqG5K.V.7f9H6WjOe0sV.yN5X8yL.wU/3X.K4z0H/j.V8m/y', # sgl_bet2026
-    '$2b$12$Z.j.E.8VqCqG5K.V.7f9H6WjOe0sV.yN5X8yL.wU/3X.K4z0H/j.V8m/y', # sgl_badru2026
-    '$2b$12$A.7.D.8VqCqG5K.V.7f9H6WjOe0sV.yN5X8yL.wU/3X.K4z0H/j.V8m/y', # sgl_zel2026
-    '$2b$12$B.8.F.8VqCqG5K.V.7f9H6WjOe0sV.yN5X8yL.wU/3X.K4z0H/j.V8m/y', # sgl_frz2026
-    '$2b$12$C.9.G.8VqCqG5K.V.7f9H6WjOe0sV.yN5X8yL.wU/3X.K4z0H/j.V8m/y', # sgl_ilmi2026
-    '$2b$12$D.0.H.8VqCqG5K.V.7f9H6WjOe0sV.yN5X8yL.wU/3X.K4z0H/j.V8m/y'  # sgl_vanhar2026
+# Password Asli (Teks Biasa)
+passwords_asli = [
+    'sgl_bet2026', 
+    'sgl_badru2026', 
+    'sgl_zel2026', 
+    'sgl_frz2026', 
+    'sgl_ilmi2026', 
+    'sgl_vanhar2026'
 ]
+
+# Mesin akan mengenkripsi (hash) password di atas secara otomatis agar 100% valid
+hashed_passwords = stauth.Hasher(passwords_asli).generate()
 
 credentials = {"usernames": {}}
 for i in range(len(usernames)):
-    credentials["usernames"][usernames[i]] = {"name": names[i], "password": passwords[i]}
+    credentials["usernames"][usernames[i]] = {"name": names[i], "password": hashed_passwords[i]}
 
 authenticator = stauth.Authenticate(
     credentials,
