@@ -5,12 +5,83 @@ import matplotlib.pyplot as plt
 import json
 import streamlit_authenticator as stauth
 
-# Konfigurasi Portrait untuk HP (Tema Elegan & Bersih)
+# =====================================================================
+# KONFIGURASI HALAMAN
+# =====================================================================
 st.set_page_config(page_title="Estimator RAB SGL", layout="centered")
 
-# CSS Kustom untuk menyembunyikan elemen bawaan Streamlit
+# =====================================================================
+# CSS KUSTOM: TEMA DARK BLUE & YELLOW NUANCE (Tanpa Logo)
+# =====================================================================
 st.markdown("""
     <style>
+        /* Mengubah Warna Dasar Aplikasi (Mempengaruhi variabel internal Streamlit) */
+        :root {
+            --primary-color: #F1C40F; /* Kuning/Emas SGL */
+            --background-color: #0A192F; /* Biru Sangat Gelap */
+            --secondary-background-color: #172A45; /* Biru Gelap (untuk card/input) */
+            --text-color: #E6F1FF; /* Putih Kebiruan terang */
+            --font: 'sans-serif';
+        }
+
+        /* Mewarnai Background Utama */
+        .stApp {
+            background-color: var(--background-color);
+            color: var(--text-color);
+        }
+
+        /* Styling Input Widgets (Selectbox, Number, Radio) */
+        .stTextInput>div>div>input, .stNumberInput>div>div>input, .stSelectbox>div>div>div, .stTextArea>div>textarea {
+            background-color: var(--secondary-background-color) !important;
+            color: var(--text-color) !important;
+            border-color: #1E3A8A !important; /* Border Biru medium */
+        }
+        
+        /* Warna label input */
+        .stTextInput>label, .stNumberInput>label, .stSelectbox>label, .stRadio>label, .stSlider>label {
+            color: #8892B0 !important; /* Abu-abu kebiruan untuk label */
+        }
+
+        /* Styling Tombol UTAMA (Tambahkan ke Master, Login) */
+        div.stButton > button:first-child {
+            background-color: var(--primary-color) !important;
+            color: #0A192F !important; /* Teks gelap di atas kuning */
+            border: none !important;
+            font-weight: bold !important;
+            width: 100%;
+        }
+        
+        div.stButton > button:first-child:hover {
+            background-color: #FFD700 !important; /* Kuning lebih terang saat hover */
+            color: #000000 !important;
+        }
+
+        /* Styling Tombol SEKUNDER (Logout, Update, Hapus, Download) */
+        div.stButton > button {
+            background-color: var(--secondary-background-color);
+            color: var(--primary-color);
+            border: 1px solid var(--primary-color);
+        }
+
+        /* Styling Expander */
+        .streamlit-expanderHeader {
+            background-color: var(--secondary-background-color) !important;
+            color: var(--primary-color) !important; /* Judul expander kuning */
+            border-radius: 5px;
+        }
+        .streamlit-expanderContent {
+            background-color: #112240 !important; /* Sedikit berbeda untuk konten */
+            border: 1px solid #1E3A8A;
+        }
+        
+        /* Styling Info/Success/Warning Box */
+        .stAlert {
+            background-color: #112240 !important;
+            color: var(--text-color) !important;
+            border: 1px solid var(--primary-color) !important;
+        }
+
+        /* Menyembunyikan elemen bawaan Streamlit */
         .block-container { padding-top: 1.5rem; padding-bottom: 2rem; }
         #MainMenu {visibility: hidden;}
         header {visibility: hidden;}
@@ -18,23 +89,17 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# =====================================================================
-# SISTEM KEAMANAN (LOGIN) - KOREKSI FINAL
-# =====================================================================
-names = ['Bet', 'Badru', 'Zel', 'Frz', 'Ilmi', 'Vanhar']
-usernames = ['bet', 'badru', 'zel', 'frz', 'ilmi', 'vanhar']
+# Set tema grafik Matplotlib ke Dark agar serasi
+plt.style.use('dark_background')
 
-# Password Asli (Teks Biasa)
-passwords_asli = [
-    'sgl_bet2026', 
-    'sgl_badru2026', 
-    'sgl_zel2026', 
-    'sgl_frz2026', 
-    'sgl_ilmi2026', 
-    'sgl_vanhar2026'
-]
+# =====================================================================
+# SISTEM KEAMANAN (LOGIN SINGLE USER)
+# =====================================================================
+# Perbaikan: Menggunakan akun spesifik diminta user
+names = ['Pemeliharaan Sipil SGL']
+usernames = ['harsipilsgl']
+passwords_asli = ['harsipilsgl_2026']
 
-# KOREKSI: Mengunci proses enkripsi agar password tidak ter-reset saat layar di-refresh
 @st.cache_data
 def hash_passwords(passwords):
     return stauth.Hasher(passwords).generate()
@@ -65,6 +130,7 @@ if authentication_status:
     with col_sapa:
         st.caption(f"Selamat bekerja, **{name}**!")
     with col_logout:
+        # Tombol ini akan otomatis berwarna sekunder (outline kuning) karena CSS
         authenticator.logout("Keluar", "main")
 
     if 'rekap_proyek' not in st.session_state:
@@ -74,7 +140,9 @@ if authentication_status:
     # HEADER APLIKASI
     # =====================================================================
     st.markdown("### Aplikasi Estimator RAB")
+    # Warna caption abu-abu kebiruan diatur lewat CSS
     st.caption("Sistem perhitungan teknis volume dan biaya konstruksi terpadu **by Pemeliharaan Sipil SGL**.")
+    # Divider default akan menyesuaikan dengan tema dark
     st.divider()
 
     # =====================================================================
@@ -112,6 +180,8 @@ if authentication_status:
     item_to_add = []
     kategori_pekerjaan = jenis_bangunan 
 
+    # --- SISA KODE LOGIKA PERHITUNGAN (TIDAK ADA YANG DIHAPUS) ---
+
     # =====================================================================
     # LOGIKA 0. PEKERJAAN PERSIAPAN
     # =====================================================================
@@ -136,7 +206,8 @@ if authentication_status:
         if show_direksi: item_to_add.append(["Fasilitas Proyek/Direksi Keet", 1.0, "LS", h_direksi])
 
         fig, ax = plt.subplots(figsize=(4, 2))
-        ax.text(0.5, 0.5, 'Pekerjaan Persiapan & Umum\n(Non-Struktural)', horizontalalignment='center', verticalalignment='center', fontsize=12, fontweight='bold', color='gray')
+        # Sesuaikan warna teks grafik agar kontras dengan background dark (Kuning)
+        ax.text(0.5, 0.5, 'Pekerjaan Persiapan & Umum\n(Non-Struktural)', horizontalalignment='center', verticalalignment='center', fontsize=12, fontweight='bold', color=plt.cm.get_cmap('YlOrBr')(0.5))
         ax.set_axis_off()
 
     # =====================================================================
@@ -186,8 +257,9 @@ if authentication_status:
         if show_besi: item_to_add.append(["Pembesian Saluran", vol_beton * r_besi, "kg", h_besi])
 
         fig, ax = plt.subplots(figsize=(5, 3))
-        ax.add_patch(plt.Rectangle((-2, -tinggi-1), 4, tinggi+2, color='saddlebrown', alpha=0.2))
-        ax.plot([-l_atas/2, -l_bawah/2, l_bawah/2, l_atas/2], [0, -tinggi, -tinggi, 0], color='black', lw=2)
+        # Sesuaikan warna elemen grafik (Saddlebrown kontras dengan dark blue, black diubah putih)
+        ax.add_patch(plt.Rectangle((-2, -tinggi-1), 4, tinggi+2, color='saddlebrown', alpha=0.3))
+        ax.plot([-l_atas/2, -l_bawah/2, l_bawah/2, l_atas/2], [0, -tinggi, -tinggi, 0], color='white', lw=2)
         ax.set_aspect('equal')
 
     # =====================================================================
@@ -226,7 +298,7 @@ if authentication_status:
         if show_plester: item_to_add.append(["Plesteran + Acian", keliling * panjang, "m²", h_plester])
 
         fig, ax = plt.subplots(figsize=(5, 3))
-        ax.plot([0, dist, dist+l_bawah, l_atas], [0, -tinggi, -tinggi, 0], color='black', lw=3)
+        ax.plot([0, dist, dist+l_bawah, l_atas], [0, -tinggi, -tinggi, 0], color='white', lw=3)
         ax.set_aspect('equal')
 
     # =====================================================================
@@ -261,7 +333,8 @@ if authentication_status:
         if show_aspal: item_to_add.append(["Aspal Hotmix AC-WC", lebar * panjang * t_aspal, "m³", h_aspal])
 
         fig, ax = plt.subplots(figsize=(5, 3))
-        ax.add_patch(plt.Rectangle((0, -t_aspal), lebar, t_aspal, color='black'))
+        # Aspal Hitam pekat agar terlihat di background dark blue
+        ax.add_patch(plt.Rectangle((0, -t_aspal), lebar, t_aspal, color='#000000'))
         ax.set_xlim(-1, lebar+1); ax.set_ylim(-0.2, 0.1); ax.set_aspect('equal')
 
     # =====================================================================
@@ -301,8 +374,9 @@ if authentication_status:
         if show_besi: item_to_add.append(["Pembesian (Dowel/Wiremesh)", (lebar * panjang * t_rigid) * r_besi, "kg", h_besi])
 
         fig, ax = plt.subplots(figsize=(5, 3))
-        ax.add_patch(plt.Rectangle((0, 0), lebar, t_rigid, color='gray', hatch='//'))
-        ax.add_patch(plt.Rectangle((0, -t_lc), lebar, t_lc, color='orange', alpha=0.4))
+        # Rigid Abu-abu terang, LC oranye alpha agar terlihat di dark mode
+        ax.add_patch(plt.Rectangle((0, 0), lebar, t_rigid, color='#A0A0A0', hatch='//'))
+        ax.add_patch(plt.Rectangle((0, -t_lc), lebar, t_lc, color='#FFA500', alpha=0.5))
         ax.set_xlim(-1, lebar+1); ax.set_ylim(-0.3, 0.4); ax.set_aspect('equal')
 
     # =====================================================================
@@ -342,7 +416,8 @@ if authentication_status:
         if show_besi: item_to_add.append(["Pembesian Pondasi", vol_beton * r_besi, "kg", h_besi])
 
         fig, ax = plt.subplots(figsize=(5, 3))
-        ax.add_patch(plt.Rectangle((-p/2, 0), p, t, color='gray'))
+        # Beton abu-abu terang
+        ax.add_patch(plt.Rectangle((-p/2, 0), p, t, color='#A0A0A0'))
         ax.set_xlim(-1, 1); ax.set_ylim(-0.2, 0.5); ax.set_aspect('equal')
 
     # =====================================================================
@@ -381,8 +456,9 @@ if authentication_status:
         if show_timbunan: item_to_add.append(["Timbunan Tanah Kembali", (l_base/2) * h * panjang, "m³", h_timbunan])
 
         fig, ax = plt.subplots(figsize=(5, 3))
-        ax.add_patch(plt.Rectangle((0, -0.4), l_base, 0.4, color='gray'))
-        ax.add_patch(plt.Rectangle((0.5, 0), 0.4, h, color='gray'))
+        # Beton abu-abu terang
+        ax.add_patch(plt.Rectangle((0, -0.4), l_base, 0.4, color='#A0A0A0'))
+        ax.add_patch(plt.Rectangle((0.5, 0), 0.4, h, color='#A0A0A0'))
         ax.set_xlim(-0.5, l_base+0.5); ax.set_ylim(-1, h+1); ax.set_aspect('equal')
 
     # =====================================================================
@@ -421,8 +497,9 @@ if authentication_status:
         if show_besi: item_to_add.append(["Pembesian Tulangan Bore Pile", vol_total_beton * r_besi, "kg", h_besi])
 
         fig, ax = plt.subplots(figsize=(5, 3))
-        ax.add_patch(plt.Rectangle((-1, -kedalaman), 2, kedalaman, color='saddlebrown', alpha=0.1))
-        ax.add_patch(plt.Rectangle((-diameter/2, -kedalaman), diameter, kedalaman, color='gray'))
+        # Tanah coklat alpha, pile abu-abu terang
+        ax.add_patch(plt.Rectangle((-1, -kedalaman), 2, kedalaman, color='saddlebrown', alpha=0.2))
+        ax.add_patch(plt.Rectangle((-diameter/2, -kedalaman), diameter, kedalaman, color='#A0A0A0'))
         ax.set_xlim(-1, 1); ax.set_ylim(-kedalaman-1, 1); ax.set_aspect('equal')
 
 
@@ -438,11 +515,13 @@ if authentication_status:
     for item in item_to_add:
         biaya = item[1] * item[3]
         subtotal_now += biaya
-        st.markdown(f"- **{item[0]}**<br><span style='color:gray; font-size:14px'>{item[1]:,.2f} {item[2]} x Rp {item[3]:,.0f} = **Rp {biaya:,.0f}**</span>", unsafe_allow_html=True)
+        # Menggunakan span untuk mewarnai biaya jadi kuning agar terbaca
+        st.markdown(f"- **{item[0]}**<br><span style='color:#8892B0; font-size:14px'>{item[1]:,.2f} {item[2]} x Rp {item[3]:,.0f} = <b style='color:var(--primary-color)'>Rp {biaya:,.0f}</b></span>", unsafe_allow_html=True)
 
     st.info(f"**Sub-Total Rincian Ini: Rp {subtotal_now:,.0f}**")
 
     if len(item_to_add) > 0:
+        # Tombol ini otomatis jadi Kuning penuh karena CSS .stButton > button:first-child
         if st.button("TAMBAHKAN KE MASTER REKAP", use_container_width=True):
             for item in item_to_add:
                 st.session_state.rekap_proyek.append({
@@ -463,6 +542,7 @@ if authentication_status:
 
     if st.session_state.rekap_proyek:
         
+        # Menu Expandable (Lipat) diatur lewat CSS agar header kuning konten dark
         with st.expander("✏️ Edit/Hapus Item Tersimpan"):
             st.caption("Pilih item di bawah ini untuk menyesuaikan ulang Volumenya:")
             opsi_edit = [f"{i+1}. {item['Pekerjaan']} ({item['Kategori'].split('.')[0]})" for i, item in enumerate(st.session_state.rekap_proyek)]
@@ -482,19 +562,23 @@ if authentication_status:
                 
                 col_e1, col_e2 = st.columns(2)
                 with col_e1:
+                    # Tombol sekunder (outline kuning)
                     if st.button("💾 Update", key=f"upd_{idx_edit}", use_container_width=True):
                         st.session_state.rekap_proyek[idx_edit]['Volume'] = val_vol
                         st.session_state.rekap_proyek[idx_edit]['AHSP'] = val_ahsp
                         st.session_state.rekap_proyek[idx_edit]['Total'] = val_vol * val_ahsp
                         st.rerun()
                 with col_e2:
+                    # Tombol sekunder (outline kuning)
                     if st.button("🗑️ Hapus", key=f"del_{idx_edit}", use_container_width=True):
                         st.session_state.rekap_proyek.pop(idx_edit)
                         st.rerun()
 
+        # Menu Expandable (Lipat) Untuk Draft Proyek
         with st.expander("📂 Simpan/Buka Draft Proyek"):
             uploaded_file = st.file_uploader("Buka Draft RAB (.json)", type="json")
             if uploaded_file is not None:
+                # Tombol sekunder (outline kuning)
                 if st.button("📂 Muat File Draft Ini", use_container_width=True):
                     try:
                         draft_data = json.load(uploaded_file)
@@ -503,9 +587,11 @@ if authentication_status:
                         st.rerun()
                     except Exception as e:
                         st.error("File draft tidak valid atau rusak.")
-            
+        
             if st.session_state.rekap_proyek:
                 draft_json = json.dumps(st.session_state.rekap_proyek, indent=4)
+                # Download button Streamlit agak susah di-style lewat CSS biasa,
+                # tapi primary color kuning akan mempengaruhinya sebagian.
                 st.download_button(
                     label="💾 Simpan Draft Saat Ini (.json)",
                     data=draft_json,
@@ -514,12 +600,13 @@ if authentication_status:
                     use_container_width=True
                 )
 
-        # =====================================================================
-        # BLOK 4: LAPORAN RAB FINAL
-        # =====================================================================
-        st.divider()
-        st.markdown("### 📊 Laporan Rencana Anggaran Biaya (RAB)")
+    # =====================================================================
+    # BLOK 4: LAPORAN RAB FINAL
+    # =====================================================================
+    st.divider()
+    st.markdown("### 📊 Laporan Rencana Anggaran Biaya (RAB)")
 
+    if st.session_state.rekap_proyek:
         df = pd.DataFrame(st.session_state.rekap_proyek).sort_values(by="Kategori")
         display_data = []
         biaya_langsung = 0
@@ -550,6 +637,7 @@ if authentication_status:
         ppn = (biaya_langsung + oh) * (ppn_pct/100)
         total_akhir = biaya_langsung + oh + ppn
 
+        # Data tambahan untuk Tampilan Akhir
         export_data = display_data.copy()
         export_data.append({"Uraian Pekerjaan": "========================================", "Volume": "", "Harga Satuan": "", "Jumlah Harga": ""})
         export_data.append({"Uraian Pekerjaan": "A. TOTAL BIAYA LANGSUNG", "Volume": "", "Harga Satuan": "", "Jumlah Harga": f"Rp {biaya_langsung:,.0f}"})
@@ -559,14 +647,16 @@ if authentication_status:
         export_data.append({"Uraian Pekerjaan": "GRAND TOTAL KONTRAK", "Volume": "", "Harga Satuan": "", "Jumlah Harga": f"Rp {total_akhir:,.0f}"})
 
         df_export = pd.DataFrame(export_data)
-        st.dataframe(df_export, use_container_width=True)
+        # Tabel Streamlit akan otomatis menyesuaikan tema dark config
+        st.dataframe(df_export, use_container_width=True, hide_index=True)
 
         st.write("---")
+        # Tombol sekunder (outline kuning)
         if st.button("🗑️ Kosongkan Master Rekap / Buat Proyek Baru", use_container_width=True):
             st.session_state.rekap_proyek = []
             st.rerun()
     else:
-        st.info("Tabel RAB dan Rekap Data belum tersedia. Silakan tambah rincian estimasi di atas terlebih dahulu.")
+        st.info("Tabel RAB masih kosong. Silakan tambah rincian estimasi di atas.")
 
 # =====================================================================
 # PESAN ERROR LOGIN
@@ -574,5 +664,6 @@ if authentication_status:
 elif authentication_status is False:
     st.error("Username atau Password salah. Silakan coba lagi.")
 elif authentication_status is None:
+    # Warna caption abu-abu kebiruan diatur lewat CSS
     st.warning("Silakan masukkan Username dan Password Anda.")
-    st.info("Aplikasi Internal Pemeliharaan Sipil SGL. Akses Dibatasi.")
+    st.info("Aplikasi Internal Pemeliharaan Sipil SGL. Akses Dibatasi. Tanpa Logo.")
