@@ -4,7 +4,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import json
 import streamlit_authenticator as stauth
-from streamlit_authenticator.utilities.hasher import Hasher
 
 # Konfigurasi Portrait untuk HP (Tema Elegan & Bersih)
 st.set_page_config(page_title="Estimator RAB SGL", layout="centered")
@@ -117,9 +116,10 @@ names = ['Pemeliharaan Sipil SGL']
 usernames = ['harsipilsgl']
 passwords_asli = ['harsipilsgl_2026']
 
+# Menggunakan perintah .generate() yang terbukti jalan di sistem Anda
 @st.cache_data
 def get_hashed_passwords(passwords):
-    return Hasher(passwords).hash()
+    return stauth.Hasher(passwords).generate()
 
 hashed_passwords = get_hashed_passwords(passwords_asli)
 
@@ -216,7 +216,6 @@ if authentication_status:
         if show_mob: item_to_add.append(["Mobilisasi & Demobilisasi", 1.0, "LS", h_mob])
         if show_direksi: item_to_add.append(["Fasilitas Proyek/Direksi Keet", 1.0, "LS", h_direksi])
 
-        # Gambar Diagram dummy untuk Persiapan
         fig, ax = plt.subplots(figsize=(4, 2))
         fig.patch.set_facecolor('#0A192F')
         ax.set_facecolor('#0A192F')
@@ -306,7 +305,6 @@ if authentication_status:
         show_pasangan = st.checkbox("Pasangan Batu Kali (1:4)", value=True, key="3_cb_pas")
         h_pasangan = st.number_input("AHSP Pasangan Batu (Rp/m³)", value=950000, key="3_h_pas") if show_pasangan else 0
         show_plester = st.checkbox("Plesteran + Acian", value=True, key="3_cb_ples")
-        # PERBAIKAN SYNTAX ERROR SEBELUMNYA DI SINI:
         h_plester = st.number_input("AHSP Plesteran (Rp/m²)", value=65000, key="3_h_ples") if show_plester else 0
 
         if show_pasangan: item_to_add.append(["Pasangan Batu Kali (1:4)", vol_batu, "m³", h_pasangan])
@@ -352,7 +350,7 @@ if authentication_status:
         fig, ax = plt.subplots(figsize=(5, 3))
         fig.patch.set_facecolor('#0A192F')
         ax.set_facecolor('#0A192F')
-        ax.add_patch(plt.Rectangle((0, -t_aspal), lebar, t_aspal, color='#F1C40F')) # Kuning agar terlihat di background gelap
+        ax.add_patch(plt.Rectangle((0, -t_aspal), lebar, t_aspal, color='#F1C40F'))
         ax.set_xlim(-1, lebar+1); ax.set_ylim(-0.2, 0.1); ax.set_aspect('equal')
 
     # =====================================================================
@@ -520,7 +518,7 @@ if authentication_status:
         fig, ax = plt.subplots(figsize=(5, 3))
         fig.patch.set_facecolor('#0A192F')
         ax.set_facecolor('#0A192F')
-        ax.add_patch(plt.Rectangle((-1, -kedalaman), 2, kedalaman, color='saddlebrown', alpha=0.3))
+        ax.add_patch(plt.Rectangle((-1, -kedalaman), 2, kedalaman, color='saddlebrown', alpha=0.2))
         ax.add_patch(plt.Rectangle((-diameter/2, -kedalaman), diameter, color='#A0A0A0'))
         ax.set_xlim(-1, 1); ax.set_ylim(-kedalaman-1, 1); ax.set_aspect('equal')
 
