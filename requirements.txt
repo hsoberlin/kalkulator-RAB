@@ -2,3 +2,5 @@ streamlit
 pandas
 numpy
 matplotlib
+xlsxwriter
+streamlit-authenticator==0.3.2
