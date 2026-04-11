@@ -34,18 +34,17 @@ st.markdown("""
             border-color: #1E3A8A !important;
         }
         
-        /* Warna label input utama (Judul dropdown/angka) */
+        /* Warna label input utama */
         .stTextInput>label, .stNumberInput>label, .stSelectbox>label, .stSlider>label {
             color: #8892B0 !important;
         }
 
-        /* PERBAIKAN: Memaksa warna tulisan Radio (Metode Pelaksanaan) dan Checkbox agar Putih Terang */
-        div[data-testid="stRadio"] > label,
-        div[data-testid="stRadio"] label p,
+        /* PERBAIKAN: Warna teks opsi Radio dan Checkbox (Item Pekerjaan) agar putih terang */
+        .stRadio div[role="radiogroup"] label p,
+        .stRadio div[role="radiogroup"] label div p, 
         .stCheckbox label p,
         .stCheckbox label span {
             color: #E6F1FF !important; 
-            font-weight: bold !important;
         }
 
         /* Styling Tombol UTAMA */
@@ -80,7 +79,7 @@ st.markdown("""
             border: 1px solid #1E3A8A;
         }
         
-        /* Styling Info/Success Box */
+        /* Styling Info/Success/Warning Box agar teks di dalamnya putih kontras */
         .stAlert {
             background-color: #112240 !important;
             border: 1px solid var(--primary-color) !important;
@@ -109,7 +108,6 @@ passwords_asli = ['harsipilsgl_2026']
 
 @st.cache_data
 def get_hashed_passwords(passwords):
-    # Menggunakan Hasher yang sudah diimport dari utilities
     return Hasher(passwords).generate()
 
 hashed_passwords = get_hashed_passwords(passwords_asli)
@@ -292,7 +290,6 @@ if authentication_status:
         show_pasangan = st.checkbox("Pasangan Batu Kali (1:4)", value=True, key="3_cb_pas")
         h_pasangan = st.number_input("AHSP Pasangan Batu (Rp/m³)", value=950000, key="3_h_pas") if show_pasangan else 0
         show_plester = st.checkbox("Plesteran + Acian", value=True, key="3_cb_ples")
-        # PERBAIKAN: Menutup tanda kurung yang salah sebelumnya
         h_plester = st.number_input("AHSP Plesteran (Rp/m²)", value=65000, key="3_h_ples") if show_plester else 0
 
         if show_pasangan: item_to_add.append(["Pasangan Batu Kali (1:4)", vol_batu, "m³", h_pasangan])
@@ -511,7 +508,7 @@ if authentication_status:
     for item in item_to_add:
         biaya = item[1] * item[3]
         subtotal_now += biaya
-        st.markdown(f"- **{item[0]}**<br><span style='color:#E6F1FF; font-size:14px'>{item[1]:,.2f} {item[2]} x Rp {item[3]:,.0f} = <b style='color:var(--primary-color)'>Rp {biaya:,.0f}</b></span>", unsafe_allow_html=True)
+        st.markdown(f"- **{item[0]}**<br><span style='color:#8892B0; font-size:14px'>{item[1]:,.2f} {item[2]} x Rp {item[3]:,.0f} = <b style='color:var(--primary-color)'>Rp {biaya:,.0f}</b></span>", unsafe_allow_html=True)
 
     st.info(f"**Sub-Total Rincian Ini: Rp {subtotal_now:,.0f}**")
 
