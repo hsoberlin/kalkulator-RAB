@@ -19,13 +19,12 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # =====================================================================
-# SISTEM KEAMANAN (LOGIN)
+# SISTEM KEAMANAN (LOGIN) - KOREKSI FINAL
 # =====================================================================
-# DI SINILAH ANDA MENENTUKAN SIAPA SAJA YANG BOLEH MASUK!
 names = ['Bet', 'Badru', 'Zel', 'Frz', 'Ilmi', 'Vanhar']
 usernames = ['bet', 'badru', 'zel', 'frz', 'ilmi', 'vanhar']
 
-# DI SINILAH ANDA MENENTUKAN PASSWORD MEREKA!
+# Password Asli (Teks Biasa)
 passwords_asli = [
     'sgl_bet2026', 
     'sgl_badru2026', 
@@ -35,12 +34,12 @@ passwords_asli = [
     'sgl_vanhar2026'
 ]
 
-# Mengunci proses enkripsi (hashing) agar password tidak ter-reset saat tombol login ditekan
+# KOREKSI: Mengunci proses enkripsi agar password tidak ter-reset saat layar di-refresh
 @st.cache_data
-def get_hashed_passwords(passwords):
+def hash_passwords(passwords):
     return stauth.Hasher(passwords).generate()
 
-hashed_passwords = get_hashed_passwords(passwords_asli)
+hashed_passwords = hash_passwords(passwords_asli)
 
 credentials = {"usernames": {}}
 for i in range(len(usernames)):
