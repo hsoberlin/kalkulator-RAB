@@ -113,7 +113,8 @@ passwords_asli = ['harsipilsgl_2026']
 
 @st.cache_data
 def get_hashed_passwords(passwords):
-    return Hasher(passwords).generate()
+    # KOREKSI: Pada versi terbaru, fungsinya adalah .hash(), bukan .generate()
+    return Hasher(passwords).hash()
 
 hashed_passwords = get_hashed_passwords(passwords_asli)
 
@@ -292,13 +293,13 @@ if authentication_status:
         else:
             p_bongkar = st.slider("Persen Bongkaran (%)", 0, 100, 100, key="3_sl_bongk")
             show_bongkar = st.checkbox("Bongkaran Batu Eksisting", value=True, key="3_cb_bongk")
-            h_bongkar = st.number_input("AHSP Bongkaran (Rp/m³)", value=15000, key="3_h_bongk") if show_bongkar else 0
+            h_bongkar = st.number_input("AHSP Bongkaran (Rp/m³)", value=150000, key="3_h_bongk") if show_bongkar else 0
             if show_bongkar: item_to_add.append([f"Bongkaran Batu Eksisting ({p_bongkar}%)", vol_batu * (p_bongkar/100), "m³", h_bongkar])
 
         show_pasangan = st.checkbox("Pasangan Batu Kali (1:4)", value=True, key="3_cb_pas")
         h_pasangan = st.number_input("AHSP Pasangan Batu (Rp/m³)", value=950000, key="3_h_pas") if show_pasangan else 0
         show_plester = st.checkbox("Plesteran + Acian", value=True, key="3_cb_ples")
-        h_plester = st.number_input("AHSP Plesteran (Rp/m²)", value=65000, key="3_h_ples} else 0
+        h_plester = st.number_input("AHSP Plesteran (Rp/m²)", value=65000, key="3_h_ples") if show_plester else 0
 
         if show_pasangan: item_to_add.append(["Pasangan Batu Kali (1:4)", vol_batu, "m³", h_pasangan])
         if show_plester: item_to_add.append(["Plesteran + Acian", keliling * panjang, "m²", h_plester])
