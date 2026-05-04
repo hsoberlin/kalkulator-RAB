@@ -1,4 +1,3 @@
-
 import streamlit as st
 import numpy as np
 import pandas as pd
@@ -41,7 +40,7 @@ jenis_bangunan = st.selectbox(
         "3. Jalan Perkerasan Lentur (Aspal)", 
         "4. Jalan Perkerasan Kaku (Rigid)",
         "5. Pondasi Telapak",
-        "6. Dinding Penahan Tanah (Kantilever)",
+        "6. Dinding Penahan Tanah (Stabilisasi Tebing)",
         "7. Pondasi Bore Pile"
     ],
     key="navigasi_utama"
@@ -296,44 +295,96 @@ elif jenis_bangunan == "5. Pondasi Telapak":
     ax.set_xlim(-1, 1); ax.set_ylim(-0.2, 0.5); ax.set_aspect('equal')
 
 # =====================================================================
-# LOGIKA 6. DINDING PENAHAN TANAH (DPT)
+# LOGIKA 6. DINDING PENAHAN TANAH (STABILISASI TEBING)
 # =====================================================================
-elif jenis_bangunan == "6. Dinding Penahan Tanah (Kantilever)":
-    st.markdown("**Dimensi DPT**")
+elif jenis_bangunan == "6. Dinding Penahan Tanah (Stabilisasi Tebing)":
+    st.markdown("**Tipe Struktur & Dimensi**")
+    tipe_dpt = st.radio("Pilih Tipe Struktur DPT:", ["Pasangan Batu (Gravity Wall)", "Beton Bertulang (Cantilever)"], key="6_tipe")
+    
+    panjang = st.number_input("Panjang Total DPT (m)", value=50.0, key="6_p")
     h = st.number_input("Tinggi Dinding (m)", value=4.0, key="6_h")
-    l_base = st.number_input("Lebar Base (m)", value=2.5, key="6_lb")
-    panjang = st.number_input("Panjang DPT (m)", value=50.0, key="6_p")
-    vol_beton = ((0.4 * h) + (l_base * 0.4)) * panjang
 
-    st.markdown("**Pekerjaan & AHSP**")
-    if mode_proyek != "Bangunan Baru":
-        p_bongkar = st.slider("Persen Bongkaran (%)", 0, 100, 100, key="6_sl_bongk")
-        show_bongkar = st.checkbox("Bongkaran DPT Eksisting", value=True, key="6_cb_bongk")
-        h_bongkar = st.number_input("AHSP Bongkaran (Rp/m³)", value=350000, key="6_h_bongk") if show_bongkar else 0
-        if show_bongkar: item_to_add.append([f"Bongkaran DPT Eksisting ({p_bongkar}%)", vol_beton * (p_bongkar/100), "m³", h_bongkar])
+    if tipe_dpt == "Pasangan Batu (Gravity Wall)":
+        l_atas = st.number_input("Lebar Atas (m)", value=0.4, key="6_batu_la")
+        l_bawah = st.number_input("Lebar Bawah (m)", value=1.5, key="6_batu_lb")
+        
+        vol_batu = ((l_atas + l_bawah) / 2) * h * panjang
+        sisi_miring = np.sqrt(h**2 + (l_bawah - l_atas)**2)
+        luas_plester = sisi_miring * panjang
+        vol_galian = l_bawah * h * panjang  # Asumsi galian tebing kotak
+        
+        st.markdown("**Pekerjaan & AHSP**")
+        if mode_proyek != "Bangunan Baru":
+            p_bongkar = st.slider("Persen Bongkaran (%)", 0, 100, 100, key="6_batu_sl_bongk")
+            show_bongkar = st.checkbox("Bongkaran Pasangan Batu Lama", value=True, key="6_batu_cb_bongk")
+            h_bongkar = st.number_input("AHSP Bongkaran (Rp/m³)", value=150000, key="6_batu_h_bongk") if show_bongkar else 0
+            if show_bongkar: item_to_add.append([f"Bongkaran Pas. Batu Eksisting ({p_bongkar}%)", vol_batu * (p_bongkar/100), "m³", h_bongkar])
 
-    show_galian = st.checkbox("Galian Struktur DPT", value=True, key="6_cb_gal")
-    h_galian = st.number_input("AHSP Galian (Rp/m³)", value=75000, key="6_h_gal") if show_galian else 0
-    show_bekisting = st.checkbox("Bekisting DPT", value=True, key="6_cb_bek")
-    h_bekisting = st.number_input("AHSP Bekisting (Rp/m²)", value=145000, key="6_h_bek") if show_bekisting else 0
-    show_cor = st.checkbox("Pengecoran Beton DPT", value=True, key="6_cb_cor")
-    h_cor = st.number_input("AHSP Beton (Rp/m³)", value=4200000, key="6_h_cor") if show_cor else 0
-    show_besi = st.checkbox("Pembesian Struktur DPT", value=True, key="6_cb_besi")
-    r_besi = st.number_input("Rasio Besi (kg/m³)", value=125, key="6_r_besi") if show_besi else 0
-    h_besi = st.number_input("AHSP Besi (Rp/kg)", value=18500, key="6_h_besi") if show_besi else 0
-    show_timbunan = st.checkbox("Timbunan Tanah Kembali", value=True, key="6_cb_timb")
-    h_timbunan = st.number_input("AHSP Timbunan (Rp/m³)", value=115000, key="6_h_timb") if show_timbunan else 0
+        show_galian = st.checkbox("Galian Tanah Tebing", value=True, key="6_batu_cb_gal")
+        h_galian = st.number_input("AHSP Galian (Rp/m³)", value=75000, key="6_batu_h_gal") if show_galian else 0
+        show_batu = st.checkbox("Pasangan Batu Kali (1:4)", value=True, key="6_batu_cb_batu")
+        h_batu = st.number_input("AHSP Pasangan Batu (Rp/m³)", value=950000, key="6_batu_h_batu") if show_batu else 0
+        show_plester = st.checkbox("Plesteran & Siaran DPT", value=True, key="6_batu_cb_ples")
+        h_plester = st.number_input("AHSP Plesteran (Rp/m²)", value=65000, key="6_batu_h_ples") if show_plester else 0
 
-    if show_galian: item_to_add.append(["Galian Struktur DPT", l_base * 1.0 * panjang, "m³", h_galian])
-    if show_bekisting: item_to_add.append(["Bekisting DPT", (h*2*panjang) + (0.4*2*panjang), "m²", h_bekisting])
-    if show_cor: item_to_add.append(["Pengecoran Beton DPT", vol_beton, "m³", h_cor])
-    if show_besi: item_to_add.append(["Pembesian Struktur DPT", vol_beton * r_besi, "kg", h_besi])
-    if show_timbunan: item_to_add.append(["Timbunan Tanah Kembali", (l_base/2) * h * panjang, "m³", h_timbunan])
+        if show_galian: item_to_add.append(["Galian Tanah Tebing", vol_galian, "m³", h_galian])
+        if show_batu: item_to_add.append(["Pasangan Batu Kali (1:4)", vol_batu, "m³", h_batu])
+        if show_plester: item_to_add.append(["Plesteran & Siaran Permukaan", luas_plester, "m²", h_plester])
 
-    fig, ax = plt.subplots(figsize=(5, 3))
-    ax.add_patch(plt.Rectangle((0, -0.4), l_base, 0.4, color='gray'))
-    ax.add_patch(plt.Rectangle((0.5, 0), 0.4, h, color='gray'))
-    ax.set_xlim(-0.5, l_base+0.5); ax.set_ylim(-1, h+1); ax.set_aspect('equal')
+        # Opsi Suling-Suling (Weep Holes) - Asumsi 1 titik per 2 m2
+        show_suling = st.checkbox("Pipa Suling-Suling PVC 2\" + Ijuk", value=True, key="6_batu_cb_suling")
+        h_suling = st.number_input("AHSP Suling-suling (Rp/Titik)", value=45000, key="6_batu_h_suling") if show_suling else 0
+        if show_suling: item_to_add.append(["Instalasi Pipa Suling PVC 2\" + Ijuk", (luas_plester/2), "Titik", h_suling])
+
+        # Plot Trapesium (Sisi tegak menempel tebing di x=0)
+        fig, ax = plt.subplots(figsize=(5, 3))
+        ax.add_patch(plt.Polygon([[0, 0], [l_bawah, 0], [l_atas, h], [0, h]], color='slategray', alpha=0.8))
+        ax.plot([0, 0], [0, h], color='saddlebrown', lw=4, label='Tebing/Tanah')
+        ax.set_xlim(-0.5, max(l_bawah, l_atas) + 0.5); ax.set_ylim(-0.5, h+0.5); ax.set_aspect('equal')
+        ax.legend(loc='upper right')
+
+    else: # Opsi Beton Bertulang (Cantilever)
+        l_base = st.number_input("Lebar Base/Lantai (m)", value=2.5, key="6_beton_lb")
+        vol_beton = ((0.4 * h) + (l_base * 0.4)) * panjang
+        vol_galian = l_base * 1.5 * panjang
+
+        st.markdown("**Pekerjaan & AHSP**")
+        if mode_proyek != "Bangunan Baru":
+            p_bongkar = st.slider("Persen Bongkaran (%)", 0, 100, 100, key="6_beton_sl_bongk")
+            show_bongkar = st.checkbox("Bongkaran DPT Beton Lama", value=True, key="6_beton_cb_bongk")
+            h_bongkar = st.number_input("AHSP Bongkaran (Rp/m³)", value=350000, key="6_beton_h_bongk") if show_bongkar else 0
+            if show_bongkar: item_to_add.append([f"Bongkaran DPT Eksisting ({p_bongkar}%)", vol_beton * (p_bongkar/100), "m³", h_bongkar])
+
+        show_galian = st.checkbox("Galian Struktur Tebing", value=True, key="6_beton_cb_gal")
+        h_galian = st.number_input("AHSP Galian (Rp/m³)", value=75000, key="6_beton_h_gal") if show_galian else 0
+        show_bekisting = st.checkbox("Bekisting DPT", value=True, key="6_beton_cb_bek")
+        h_bekisting = st.number_input("AHSP Bekisting (Rp/m²)", value=145000, key="6_beton_h_bek") if show_bekisting else 0
+        show_cor = st.checkbox("Pengecoran Beton DPT", value=True, key="6_beton_cb_cor")
+        h_cor = st.number_input("AHSP Beton (Rp/m³)", value=4200000, key="6_beton_h_cor") if show_cor else 0
+        show_besi = st.checkbox("Pembesian Struktur DPT", value=True, key="6_beton_cb_besi")
+        r_besi = st.number_input("Rasio Besi (kg/m³)", value=125, key="6_beton_r_besi") if show_besi else 0
+        h_besi = st.number_input("AHSP Besi (Rp/kg)", value=18500, key="6_beton_h_besi") if show_besi else 0
+        show_timbunan = st.checkbox("Timbunan Tanah Kembali (Backfill)", value=True, key="6_beton_cb_timb")
+        h_timbunan = st.number_input("AHSP Timbunan (Rp/m³)", value=115000, key="6_beton_h_timb") if show_timbunan else 0
+
+        if show_galian: item_to_add.append(["Galian Struktur Tebing", vol_galian, "m³", h_galian])
+        if show_bekisting: item_to_add.append(["Bekisting DPT", (h*2*panjang) + (0.4*2*panjang), "m²", h_bekisting])
+        if show_cor: item_to_add.append(["Pengecoran Beton DPT", vol_beton, "m³", h_cor])
+        if show_besi: item_to_add.append(["Pembesian Struktur DPT", vol_beton * r_besi, "kg", h_besi])
+        if show_timbunan: item_to_add.append(["Timbunan Tanah Kembali (Backfill)", (l_base/2) * h * panjang, "m³", h_timbunan])
+
+        # Opsi Suling-Suling (Weep Holes)
+        show_suling = st.checkbox("Pipa Suling-Suling PVC 2\" + Ijuk", value=True, key="6_beton_cb_suling")
+        h_suling = st.number_input("AHSP Suling-suling (Rp/Titik)", value=45000, key="6_beton_h_suling") if show_suling else 0
+        if show_suling: item_to_add.append(["Instalasi Pipa Suling PVC 2\" + Ijuk", ((h*panjang)/2), "Titik", h_suling])
+
+        # Plot Penampang L-Shape (Menahan tanah di sisi kanan)
+        fig, ax = plt.subplots(figsize=(5, 3))
+        ax.add_patch(plt.Rectangle((0, -0.4), l_base, 0.4, color='darkgray'))
+        ax.add_patch(plt.Rectangle((0.5, 0), 0.4, h, color='darkgray'))
+        ax.add_patch(plt.Rectangle((0.9, 0), l_base-0.9, h, color='saddlebrown', alpha=0.3, label='Timbunan Tebing'))
+        ax.set_xlim(-0.5, l_base+0.5); ax.set_ylim(-1, h+1); ax.set_aspect('equal')
+        ax.legend(loc='upper right')
 
 # =====================================================================
 # LOGIKA 7. PONDASI BORE PILE
