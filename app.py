@@ -299,19 +299,23 @@ elif jenis_bangunan == "5. Pondasi Telapak":
 # =====================================================================
 elif jenis_bangunan == "6. Dinding Penahan Tanah (Stabilisasi Tebing)":
     st.markdown("**Tipe Struktur & Dimensi**")
-    tipe_dpt = st.radio("Pilih Tipe Struktur DPT:", ["Pasangan Batu (Gravity Wall)", "Beton Bertulang (Cantilever)"], key="6_tipe")
+    tipe_dpt = st.radio("Pilih Tipe Struktur DPT:", [
+        "Pasangan Batu (Gravity Wall)", 
+        "Beton Bertulang (Cantilever)",
+        "Pasangan Batu Bertingkat (Terasering)"
+    ], key="6_tipe")
     
     panjang = st.number_input("Panjang Total DPT (m)", value=50.0, key="6_p")
-    h = st.number_input("Tinggi Dinding (m)", value=4.0, key="6_h")
 
     if tipe_dpt == "Pasangan Batu (Gravity Wall)":
+        h = st.number_input("Tinggi Dinding (m)", value=4.0, key="6_h")
         l_atas = st.number_input("Lebar Atas (m)", value=0.4, key="6_batu_la")
         l_bawah = st.number_input("Lebar Bawah (m)", value=1.5, key="6_batu_lb")
         
         vol_batu = ((l_atas + l_bawah) / 2) * h * panjang
         sisi_miring = np.sqrt(h**2 + (l_bawah - l_atas)**2)
         luas_plester = sisi_miring * panjang
-        vol_galian = l_bawah * h * panjang  # Asumsi galian tebing kotak
+        vol_galian = l_bawah * h * panjang
         
         st.markdown("**Pekerjaan & AHSP**")
         if mode_proyek != "Bangunan Baru":
@@ -331,19 +335,85 @@ elif jenis_bangunan == "6. Dinding Penahan Tanah (Stabilisasi Tebing)":
         if show_batu: item_to_add.append(["Pasangan Batu Kali (1:4)", vol_batu, "m³", h_batu])
         if show_plester: item_to_add.append(["Plesteran & Siaran Permukaan", luas_plester, "m²", h_plester])
 
-        # Opsi Suling-Suling (Weep Holes) - Asumsi 1 titik per 2 m2
         show_suling = st.checkbox("Pipa Suling-Suling PVC 2\" + Ijuk", value=True, key="6_batu_cb_suling")
         h_suling = st.number_input("AHSP Suling-suling (Rp/Titik)", value=45000, key="6_batu_h_suling") if show_suling else 0
         if show_suling: item_to_add.append(["Instalasi Pipa Suling PVC 2\" + Ijuk", (luas_plester/2), "Titik", h_suling])
 
-        # Plot Trapesium (Sisi tegak menempel tebing di x=0)
         fig, ax = plt.subplots(figsize=(5, 3))
         ax.add_patch(plt.Polygon([[0, 0], [l_bawah, 0], [l_atas, h], [0, h]], color='slategray', alpha=0.8))
         ax.plot([0, 0], [0, h], color='saddlebrown', lw=4, label='Tebing/Tanah')
         ax.set_xlim(-0.5, max(l_bawah, l_atas) + 0.5); ax.set_ylim(-0.5, h+0.5); ax.set_aspect('equal')
         ax.legend(loc='upper right')
 
+    elif tipe_dpt == "Pasangan Batu Bertingkat (Terasering)":
+        jml_tingkat = st.number_input("Jumlah Tingkat (Trap)", value=3, step=1, min_value=1, key="6_ter_jml")
+        h_trap = st.number_input("Tinggi per Tingkat (m)", value=2.0, key="6_ter_h")
+        l_atas = st.number_input("Lebar Atas per Tingkat (m)", value=0.4, key="6_ter_la")
+        l_bawah = st.number_input("Lebar Bawah per Tingkat (m)", value=1.0, key="6_ter_lb")
+        l_berm = st.number_input("Lebar Pijakan/Berm antar Tingkat (m)", value=0.5, key="6_ter_berm")
+
+        vol_batu_per_trap = ((l_atas + l_bawah) / 2) * h_trap * panjang
+        vol_total_batu = vol_batu_per_trap * jml_tingkat
+        sisi_miring = np.sqrt(h_trap**2 + (l_bawah - l_atas)**2)
+        luas_plester = (sisi_miring * panjang * jml_tingkat) + (l_berm * panjang * (jml_tingkat - 1))
+        
+        lebar_galian_total = l_bawah + (l_berm * (jml_tingkat - 1))
+        tinggi_total = h_trap * jml_tingkat
+        vol_galian = lebar_galian_total * tinggi_total * panjang
+
+        st.markdown("**Pekerjaan & AHSP**")
+        if mode_proyek != "Bangunan Baru":
+            p_bongkar = st.slider("Persen Bongkaran (%)", 0, 100, 100, key="6_ter_sl_bongk")
+            show_bongkar = st.checkbox("Bongkaran Pas. Batu Lama", value=True, key="6_ter_cb_bongk")
+            h_bongkar = st.number_input("AHSP Bongkaran (Rp/m³)", value=150000, key="6_ter_h_bongk") if show_bongkar else 0
+            if show_bongkar: item_to_add.append([f"Bongkaran Pas. Batu Eksisting ({p_bongkar}%)", vol_total_batu * (p_bongkar/100), "m³", h_bongkar])
+
+        show_galian = st.checkbox("Galian Tanah Tebing", value=True, key="6_ter_cb_gal")
+        h_galian = st.number_input("AHSP Galian (Rp/m³)", value=75000, key="6_ter_h_gal") if show_galian else 0
+        show_batu = st.checkbox("Pasangan Batu Kali (1:4)", value=True, key="6_ter_cb_batu")
+        h_batu = st.number_input("AHSP Pasangan Batu (Rp/m³)", value=950000, key="6_ter_h_batu") if show_batu else 0
+        show_plester = st.checkbox("Plesteran & Siaran DPT", value=True, key="6_ter_cb_ples")
+        h_plester = st.number_input("AHSP Plesteran (Rp/m²)", value=65000, key="6_ter_h_ples") if show_plester else 0
+
+        if show_galian: item_to_add.append(["Galian Tanah Tebing (Terasering)", vol_galian, "m³", h_galian])
+        if show_batu: item_to_add.append(["Pasangan Batu Kali (Terasering)", vol_total_batu, "m³", h_batu])
+        if show_plester: item_to_add.append(["Plesteran & Siaran Permukaan (Termasuk Berm)", luas_plester, "m²", h_plester])
+
+        show_suling = st.checkbox("Pipa Suling-Suling PVC 2\" + Ijuk", value=True, key="6_ter_cb_suling")
+        h_suling = st.number_input("AHSP Suling-suling (Rp/Titik)", value=45000, key="6_ter_h_suling") if show_suling else 0
+        if show_suling: item_to_add.append(["Instalasi Pipa Suling PVC 2\" + Ijuk", ((sisi_miring * panjang * jml_tingkat)/2), "Titik", h_suling])
+
+        # Plot Penampang Berundak (Terasering)
+        fig, ax = plt.subplots(figsize=(6, 4))
+        x_off = 0
+        y_off = 0
+        max_x = 0
+        min_x = 0
+        for i in range(int(jml_tingkat)):
+            pts = np.array([
+                [x_off, y_off], 
+                [x_off + l_bawah, y_off], 
+                [x_off + l_atas, y_off + h_trap], 
+                [x_off, y_off + h_trap]
+            ])
+            ax.add_patch(plt.Polygon(pts, color='slategray', alpha=0.8, ec='black'))
+            ax.plot([x_off, x_off], [y_off, y_off + h_trap], color='saddlebrown', lw=3)
+            
+            if i < jml_tingkat - 1:
+                ax.plot([x_off, x_off - l_berm], [y_off + h_trap, y_off + h_trap], color='saddlebrown', lw=3)
+                x_off -= l_berm
+                
+            y_off += h_trap
+            max_x = max(max_x, x_off + l_bawah + l_berm)
+            min_x = min(min_x, x_off)
+            
+        ax.set_xlim(min_x - 1, max_x + 1)
+        ax.set_ylim(-0.5, y_off + 1)
+        ax.set_aspect('equal')
+        ax.axis('off')
+
     else: # Opsi Beton Bertulang (Cantilever)
+        h = st.number_input("Tinggi Dinding (m)", value=4.0, key="6_h")
         l_base = st.number_input("Lebar Base/Lantai (m)", value=2.5, key="6_beton_lb")
         vol_beton = ((0.4 * h) + (l_base * 0.4)) * panjang
         vol_galian = l_base * 1.5 * panjang
@@ -373,12 +443,10 @@ elif jenis_bangunan == "6. Dinding Penahan Tanah (Stabilisasi Tebing)":
         if show_besi: item_to_add.append(["Pembesian Struktur DPT", vol_beton * r_besi, "kg", h_besi])
         if show_timbunan: item_to_add.append(["Timbunan Tanah Kembali (Backfill)", (l_base/2) * h * panjang, "m³", h_timbunan])
 
-        # Opsi Suling-Suling (Weep Holes)
         show_suling = st.checkbox("Pipa Suling-Suling PVC 2\" + Ijuk", value=True, key="6_beton_cb_suling")
         h_suling = st.number_input("AHSP Suling-suling (Rp/Titik)", value=45000, key="6_beton_h_suling") if show_suling else 0
         if show_suling: item_to_add.append(["Instalasi Pipa Suling PVC 2\" + Ijuk", ((h*panjang)/2), "Titik", h_suling])
 
-        # Plot Penampang L-Shape (Menahan tanah di sisi kanan)
         fig, ax = plt.subplots(figsize=(5, 3))
         ax.add_patch(plt.Rectangle((0, -0.4), l_base, 0.4, color='darkgray'))
         ax.add_patch(plt.Rectangle((0.5, 0), 0.4, h, color='darkgray'))
