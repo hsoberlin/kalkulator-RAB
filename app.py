@@ -2,7 +2,7 @@ import streamlit as st
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-import json
+import json # Modul untuk menyimpan dan membuka Draft
 
 # Konfigurasi Portrait untuk HP (Tema Elegan & Bersih)
 st.set_page_config(page_title="KERAS - Estimator RAB", layout="centered")
@@ -50,7 +50,6 @@ st.markdown("### Aplikasi Estimator RAB")
 st.caption("Sistem perhitungan teknis volume dan biaya konstruksi terpadu **by Pemeliharaan Sipil SGL**.")
 st.divider()
 
-# Tombol Logout
 col_out1, col_out2 = st.columns([3, 1])
 with col_out2:
     if st.button("🚪 Logout"):
@@ -100,10 +99,13 @@ if jenis_bangunan == "0. Pekerjaan Persiapan":
     
     show_survey = st.checkbox("Survey, Pengukuran & Pasang Bowplank", value=True, key="0_cb_surv")
     h_survey = st.number_input("Biaya Survey (Rp)", value=5000000, key="0_h_surv") if show_survey else 0
+
     show_k3 = st.checkbox("Penyelenggaraan SMK3 (K3 Konstruksi)", value=True, key="0_cb_k3")
     h_k3 = st.number_input("Biaya K3 (Rp)", value=3500000, key="0_h_k3") if show_k3 else 0
+
     show_mob = st.checkbox("Mobilisasi & Demobilisasi Alat Berat", value=True, key="0_cb_mob")
     h_mob = st.number_input("Biaya Mob-Demob (Rp)", value=12000000, key="0_h_mob") if show_mob else 0
+
     show_direksi = st.checkbox("Sewa/Pembuatan Direksi Keet", value=True, key="0_cb_dir")
     h_direksi = st.number_input("Biaya Direksi Keet (Rp)", value=7500000, key="0_h_dir") if show_direksi else 0
 
@@ -166,7 +168,8 @@ elif jenis_bangunan == "1. Saluran Trapesium (Beton)":
     ax.add_patch(plt.Rectangle((-2, -tinggi-1), 4, tinggi+2, color='saddlebrown', alpha=0.2))
     ax.plot([-l_atas/2, -l_bawah/2, l_bawah/2, l_atas/2], [0, -tinggi, -tinggi, 0], color='black', lw=2)
     ax.set_aspect('equal')
-    ax.set_xlabel("Lebar (m)"); ax.set_ylabel("Tinggi/Kedalaman (m)")
+    ax.set_xlabel("Lebar Saluran (m)")
+    ax.set_ylabel("Tinggi/Kedalaman (m)")
     ax.grid(True, linestyle='--', alpha=0.6)
 
 # =====================================================================
@@ -207,7 +210,8 @@ elif jenis_bangunan == "2. Saluran Pasangan Batu (Drainase)":
     fig, ax = plt.subplots(figsize=(5, 3))
     ax.plot([0, dist, dist+l_bawah, l_atas], [0, -tinggi, -tinggi, 0], color='black', lw=3)
     ax.set_aspect('equal')
-    ax.set_xlabel("Lebar (m)"); ax.set_ylabel("Tinggi/Kedalaman (m)")
+    ax.set_xlabel("Lebar Saluran (m)")
+    ax.set_ylabel("Tinggi/Kedalaman (m)")
     ax.grid(True, linestyle='--', alpha=0.6)
 
 # =====================================================================
@@ -244,7 +248,8 @@ elif jenis_bangunan == "3. Jalan Perkerasan Lentur (Aspal)":
     fig, ax = plt.subplots(figsize=(5, 3))
     ax.add_patch(plt.Rectangle((0, -t_aspal), lebar, t_aspal, color='black'))
     ax.set_xlim(-1, lebar+1); ax.set_ylim(-0.2, 0.1); ax.set_aspect('equal')
-    ax.set_xlabel("Lebar (m)"); ax.set_ylabel("Ketebalan (m)")
+    ax.set_xlabel("Lebar Jalan (m)")
+    ax.set_ylabel("Ketebalan (m)")
     ax.grid(True, linestyle='--', alpha=0.6)
 
 # =====================================================================
@@ -287,7 +292,8 @@ elif jenis_bangunan == "4. Jalan Perkerasan Kaku (Rigid)":
     ax.add_patch(plt.Rectangle((0, 0), lebar, t_rigid, color='gray', hatch='//'))
     ax.add_patch(plt.Rectangle((0, -t_lc), lebar, t_lc, color='orange', alpha=0.4))
     ax.set_xlim(-1, lebar+1); ax.set_ylim(-0.3, 0.4); ax.set_aspect('equal')
-    ax.set_xlabel("Lebar (m)"); ax.set_ylabel("Ketebalan (m)")
+    ax.set_xlabel("Lebar Jalan (m)")
+    ax.set_ylabel("Ketebalan (m)")
     ax.grid(True, linestyle='--', alpha=0.6)
 
 # =====================================================================
@@ -329,7 +335,8 @@ elif jenis_bangunan == "5. Pondasi Telapak":
     fig, ax = plt.subplots(figsize=(5, 3))
     ax.add_patch(plt.Rectangle((-p/2, 0), p, t, color='gray'))
     ax.set_xlim(-1, 1); ax.set_ylim(-0.2, 0.5); ax.set_aspect('equal')
-    ax.set_xlabel("Panjang (m)"); ax.set_ylabel("Ketebalan (m)")
+    ax.set_xlabel("Panjang Pondasi (m)")
+    ax.set_ylabel("Ketebalan Plat (m)")
     ax.grid(True, linestyle='--', alpha=0.6)
 
 # =====================================================================
@@ -377,11 +384,19 @@ elif jenis_bangunan == "6. Dinding Penahan Tanah (Stabilisasi Tebing)":
         h_suling = st.number_input("AHSP Suling-suling (Rp/Titik)", value=45000, key="6_batu_h_suling") if show_suling else 0
         if show_suling: item_to_add.append(["Instalasi Pipa Suling PVC 2\" + Ijuk", (luas_plester/2), "Titik", h_suling])
 
-        fig, ax = plt.subplots(figsize=(5, 3))
+        fig, ax = plt.subplots(figsize=(5, 4))
         ax.add_patch(plt.Polygon([[0, 0], [l_bawah, 0], [l_atas, h], [0, h]], color='slategray', alpha=0.8))
         ax.plot([0, 0], [0, h], color='saddlebrown', lw=4, label='Tebing/Tanah')
-        ax.set_xlim(-0.5, max(l_bawah, l_atas) + 0.5); ax.set_ylim(-0.5, h+0.5); ax.set_aspect('equal')
-        ax.set_xlabel("Lebar (m)"); ax.set_ylabel("Tinggi (m)")
+        
+        # Anotasi Dimensi
+        ax.text(l_bawah/2, 0.1, f'{l_bawah}m', ha='center', va='bottom', fontsize=9, color='white')
+        ax.text(l_atas/2, h - 0.3, f'{l_atas}m', ha='center', va='top', fontsize=9, color='white')
+        
+        ax.set_xlim(-0.5, max(l_bawah, l_atas) + 0.5)
+        ax.set_ylim(-0.5, h+0.5)
+        ax.set_aspect('equal')
+        ax.set_xlabel("Lebar Struktur (m)")
+        ax.set_ylabel("Tinggi Total (m)")
         ax.grid(True, linestyle='--', alpha=0.6)
         ax.legend(loc='upper right')
 
@@ -423,36 +438,63 @@ elif jenis_bangunan == "6. Dinding Penahan Tanah (Stabilisasi Tebing)":
         h_suling = st.number_input("AHSP Suling-suling (Rp/Titik)", value=45000, key="6_ter_h_suling") if show_suling else 0
         if show_suling: item_to_add.append(["Instalasi Pipa Suling PVC 2\" + Ijuk", ((sisi_miring * panjang * jml_tingkat)/2), "Titik", h_suling])
 
-        # Plot Penampang Berundak (Terasering)
-        fig, ax = plt.subplots(figsize=(6, 4))
-        x_off = 0
-        y_off = 0
+        # Plot Penampang Berundak Terasering (Dipisah sempurna)
+        fig, ax = plt.subplots(figsize=(6, 5))
+        x_heel = 0
+        y_bottom = 0
         max_x = 0
         min_x = 0
+
+        soil_pts = [[0, 0]]
         for i in range(int(jml_tingkat)):
+            x_toe = x_heel + l_bawah
             pts = np.array([
-                [x_off, y_off], 
-                [x_off + l_bawah, y_off], 
-                [x_off + l_atas, y_off + h_trap], 
-                [x_off, y_off + h_trap]
+                [x_heel, y_bottom],
+                [x_toe, y_bottom],
+                [x_heel + l_atas, y_bottom + h_trap],
+                [x_heel, y_bottom + h_trap]
             ])
-            ax.add_patch(plt.Polygon(pts, color='slategray', alpha=0.8, ec='black'))
-            ax.plot([x_off, x_off], [y_off, y_off + h_trap], color='saddlebrown', lw=3)
-            
+            ax.add_patch(plt.Polygon(pts, color='slategray', alpha=0.9, ec='black', lw=1.5))
+
+            # Anotasi Dimensi Per Trap
+            ax.text(x_heel + l_bawah/2, y_bottom + 0.1, f'{l_bawah}m', ha='center', va='bottom', fontsize=8, color='white')
+            ax.text(x_heel + l_atas/2, y_bottom + h_trap - 0.3, f'{l_atas}m', ha='center', va='top', fontsize=8, color='white')
+            ax.text(x_heel - 0.1, y_bottom + h_trap/2, f'{h_trap}m', ha='right', va='center', fontsize=8, rotation=90)
+
+            soil_pts.append([x_heel, y_bottom])
+            soil_pts.append([x_heel, y_bottom + h_trap])
+
+            # Jarak tanah antar trap (Berm)
             if i < jml_tingkat - 1:
-                ax.plot([x_off, x_off - l_berm], [y_off + h_trap, y_off + h_trap], color='saddlebrown', lw=3)
-                x_off -= l_berm
+                next_x_toe = x_heel - l_berm
+                next_x_heel = next_x_toe - l_bawah
+                soil_pts.append([next_x_toe, y_bottom + h_trap])
                 
-            y_off += h_trap
-            max_x = max(max_x, x_off + l_bawah + l_berm)
-            min_x = min(min_x, x_off)
-            
-        ax.set_xlim(min_x - 1, max_x + 1)
-        ax.set_ylim(-0.5, y_off + 1)
+                # Anotasi Lebar Berm
+                ax.text(x_heel - l_berm/2, y_bottom + h_trap + 0.1, f'Berm {l_berm}m', ha='center', va='bottom', fontsize=8, color='saddlebrown')
+                
+                x_heel = next_x_heel
+
+            y_bottom += h_trap
+            min_x = min(min_x, x_heel)
+            max_x = max(max_x, x_toe)
+
+        # Melengkapi gambar tanah
+        soil_pts.append([min_x - 2, y_bottom])
+        soil_pts.append([min_x - 2, 0])
+        ax.add_patch(plt.Polygon(soil_pts, color='saddlebrown', alpha=0.2))
+
+        # Garis batas tanah tebing
+        x_s, y_s = zip(*soil_pts[:-2])
+        ax.plot(x_s, y_s, color='saddlebrown', lw=3, label='Tanah / Tebing')
+
+        ax.set_xlim(min_x - 1.5, max_x + 1.5)
+        ax.set_ylim(-1, y_bottom + 1.5)
         ax.set_aspect('equal')
-        ax.set_xlabel("Lebar Kemunduran Terasering (m)")
-        ax.set_ylabel("Tinggi Total (m)")
+        ax.set_xlabel("Jarak Horizontal (m)")
+        ax.set_ylabel("Tinggi Elevasi (m)")
         ax.grid(True, linestyle='--', alpha=0.6)
+        ax.legend(loc='upper left')
 
     else: # Opsi Beton Bertulang (Cantilever)
         h = st.number_input("Tinggi Dinding (m)", value=4.0, key="6_h")
@@ -489,12 +531,17 @@ elif jenis_bangunan == "6. Dinding Penahan Tanah (Stabilisasi Tebing)":
         h_suling = st.number_input("AHSP Suling-suling (Rp/Titik)", value=45000, key="6_beton_h_suling") if show_suling else 0
         if show_suling: item_to_add.append(["Instalasi Pipa Suling PVC 2\" + Ijuk", ((h*panjang)/2), "Titik", h_suling])
 
-        fig, ax = plt.subplots(figsize=(5, 3))
+        fig, ax = plt.subplots(figsize=(5, 4))
         ax.add_patch(plt.Rectangle((0, -0.4), l_base, 0.4, color='darkgray'))
         ax.add_patch(plt.Rectangle((0.5, 0), 0.4, h, color='darkgray'))
         ax.add_patch(plt.Rectangle((0.9, 0), l_base-0.9, h, color='saddlebrown', alpha=0.3, label='Timbunan Tebing'))
+        
+        ax.text(l_base/2, -0.2, f'{l_base}m', ha='center', va='center', fontsize=9, color='white')
+        ax.text(0.7, h/2, f'{h}m', ha='center', va='center', fontsize=9, color='white', rotation=90)
+        
         ax.set_xlim(-0.5, l_base+0.5); ax.set_ylim(-1, h+1); ax.set_aspect('equal')
-        ax.set_xlabel("Lebar (m)"); ax.set_ylabel("Tinggi (m)")
+        ax.set_xlabel("Lebar Struktur (m)")
+        ax.set_ylabel("Tinggi/Elevasi (m)")
         ax.grid(True, linestyle='--', alpha=0.6)
         ax.legend(loc='upper right')
 
@@ -533,11 +580,12 @@ elif jenis_bangunan == "7. Pondasi Bore Pile":
     if show_cor: item_to_add.append(["Pengecoran Beton K-350 (Bore Pile)", vol_total_beton, "m³", h_cor])
     if show_besi: item_to_add.append(["Pembesian Tulangan Bore Pile", vol_total_beton * r_besi, "kg", h_besi])
 
-    fig, ax = plt.subplots(figsize=(5, 3))
+    fig, ax = plt.subplots(figsize=(5, 4))
     ax.add_patch(plt.Rectangle((-1, -kedalaman), 2, kedalaman, color='saddlebrown', alpha=0.1))
     ax.add_patch(plt.Rectangle((-diameter/2, -kedalaman), diameter, kedalaman, color='gray'))
     ax.set_xlim(-1, 1); ax.set_ylim(-kedalaman-1, 1); ax.set_aspect('equal')
-    ax.set_xlabel("Lebar Galian (m)"); ax.set_ylabel("Kedalaman (m)")
+    ax.set_xlabel("Lebar Galian/Diameter (m)")
+    ax.set_ylabel("Kedalaman (m)")
     ax.grid(True, linestyle='--', alpha=0.6)
 
 # =====================================================================
@@ -578,7 +626,6 @@ st.markdown("### 📊 Laporan Rencana Anggaran Biaya")
 
 if st.session_state.rekap_proyek:
     
-    # Menu Expandable (Lipat) Untuk Edit Data agar hemat tempat di HP
     with st.expander("✏️ Edit/Hapus Item Tersimpan"):
         st.caption("Pilih item di bawah ini untuk menyesuaikan ulang Volumenya:")
         opsi_edit = [f"{i+1}. {item['Pekerjaan']} ({item['Kategori'].split('.')[0]})" for i, item in enumerate(st.session_state.rekap_proyek)]
@@ -608,7 +655,6 @@ if st.session_state.rekap_proyek:
                     st.session_state.rekap_proyek.pop(idx_edit)
                     st.rerun()
 
-    # Menu Expandable (Lipat) Untuk Draft Proyek
     with st.expander("📁 Manajemen Draft Proyek (Simpan/Buka)"):
         uploaded_file = st.file_uploader("Buka Draft RAB (.json)", type="json")
         if uploaded_file is not None:
