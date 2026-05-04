@@ -2,12 +2,12 @@ import streamlit as st
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-import json # Modul untuk menyimpan dan membuka Draft
+import json
 
 # Konfigurasi Portrait untuk HP (Tema Elegan & Bersih)
-st.set_page_config(page_title="Estimator RAB SGL", layout="centered")
+st.set_page_config(page_title="KERAS - Estimator RAB", layout="centered")
 
-# CSS Kustom untuk menyembunyikan elemen bawaan Streamlit agar terasa seperti App Mobile Asli
+# CSS Kustom untuk menyembunyikan elemen bawaan Streamlit
 st.markdown("""
     <style>
         .block-container { padding-top: 1.5rem; padding-bottom: 2rem; }
@@ -16,15 +16,46 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
+# =====================================================================
+# SISTEM LOGIN (1 PINTU)
+# =====================================================================
+if 'logged_in' not in st.session_state:
+    st.session_state.logged_in = False
+
+if not st.session_state.logged_in:
+    st.markdown("<h2 style='text-align: center; color: #005c9a;'>🔒 LOGIN AKSES</h2>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align: center;'>Kalkulator Estimasi RAB Sipil (KERAS) - PLTA Saguling</p>", unsafe_allow_html=True)
+    
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        st.divider()
+        username = st.text_input("Username")
+        password = st.text_input("Password", type="password")
+        
+        if st.button("🔑 Masuk", use_container_width=True):
+            if username == "sipil.saguling" and password == "Sipil2026!":
+                st.session_state.logged_in = True
+                st.rerun()
+            else:
+                st.error("❌ Username atau Password salah!")
+    st.stop() # Menghentikan pembacaan kode di bawahnya jika belum login
+
+# =====================================================================
+# INISIALISASI VARIABEL GLOBAL SETELAH LOGIN
+# =====================================================================
 if 'rekap_proyek' not in st.session_state:
     st.session_state.rekap_proyek = []
 
-# =====================================================================
-# HEADER APLIKASI
-# =====================================================================
 st.markdown("### Aplikasi Estimator RAB")
 st.caption("Sistem perhitungan teknis volume dan biaya konstruksi terpadu **by Pemeliharaan Sipil SGL**.")
 st.divider()
+
+# Tombol Logout
+col_out1, col_out2 = st.columns([3, 1])
+with col_out2:
+    if st.button("🚪 Logout"):
+        st.session_state.logged_in = False
+        st.rerun()
 
 # =====================================================================
 # BLOK 1: TAMBAH PEKERJAAN
@@ -69,13 +100,10 @@ if jenis_bangunan == "0. Pekerjaan Persiapan":
     
     show_survey = st.checkbox("Survey, Pengukuran & Pasang Bowplank", value=True, key="0_cb_surv")
     h_survey = st.number_input("Biaya Survey (Rp)", value=5000000, key="0_h_surv") if show_survey else 0
-
     show_k3 = st.checkbox("Penyelenggaraan SMK3 (K3 Konstruksi)", value=True, key="0_cb_k3")
     h_k3 = st.number_input("Biaya K3 (Rp)", value=3500000, key="0_h_k3") if show_k3 else 0
-
     show_mob = st.checkbox("Mobilisasi & Demobilisasi Alat Berat", value=True, key="0_cb_mob")
     h_mob = st.number_input("Biaya Mob-Demob (Rp)", value=12000000, key="0_h_mob") if show_mob else 0
-
     show_direksi = st.checkbox("Sewa/Pembuatan Direksi Keet", value=True, key="0_cb_dir")
     h_direksi = st.number_input("Biaya Direksi Keet (Rp)", value=7500000, key="0_h_dir") if show_direksi else 0
 
@@ -138,6 +166,8 @@ elif jenis_bangunan == "1. Saluran Trapesium (Beton)":
     ax.add_patch(plt.Rectangle((-2, -tinggi-1), 4, tinggi+2, color='saddlebrown', alpha=0.2))
     ax.plot([-l_atas/2, -l_bawah/2, l_bawah/2, l_atas/2], [0, -tinggi, -tinggi, 0], color='black', lw=2)
     ax.set_aspect('equal')
+    ax.set_xlabel("Lebar (m)"); ax.set_ylabel("Tinggi/Kedalaman (m)")
+    ax.grid(True, linestyle='--', alpha=0.6)
 
 # =====================================================================
 # LOGIKA 2. SALURAN PASANGAN BATU
@@ -177,6 +207,8 @@ elif jenis_bangunan == "2. Saluran Pasangan Batu (Drainase)":
     fig, ax = plt.subplots(figsize=(5, 3))
     ax.plot([0, dist, dist+l_bawah, l_atas], [0, -tinggi, -tinggi, 0], color='black', lw=3)
     ax.set_aspect('equal')
+    ax.set_xlabel("Lebar (m)"); ax.set_ylabel("Tinggi/Kedalaman (m)")
+    ax.grid(True, linestyle='--', alpha=0.6)
 
 # =====================================================================
 # LOGIKA 3. JALAN PERKERASAN LENTUR (ASPAL)
@@ -212,6 +244,8 @@ elif jenis_bangunan == "3. Jalan Perkerasan Lentur (Aspal)":
     fig, ax = plt.subplots(figsize=(5, 3))
     ax.add_patch(plt.Rectangle((0, -t_aspal), lebar, t_aspal, color='black'))
     ax.set_xlim(-1, lebar+1); ax.set_ylim(-0.2, 0.1); ax.set_aspect('equal')
+    ax.set_xlabel("Lebar (m)"); ax.set_ylabel("Ketebalan (m)")
+    ax.grid(True, linestyle='--', alpha=0.6)
 
 # =====================================================================
 # LOGIKA 4. JALAN PERKERASAN KAKU (RIGID)
@@ -253,6 +287,8 @@ elif jenis_bangunan == "4. Jalan Perkerasan Kaku (Rigid)":
     ax.add_patch(plt.Rectangle((0, 0), lebar, t_rigid, color='gray', hatch='//'))
     ax.add_patch(plt.Rectangle((0, -t_lc), lebar, t_lc, color='orange', alpha=0.4))
     ax.set_xlim(-1, lebar+1); ax.set_ylim(-0.3, 0.4); ax.set_aspect('equal')
+    ax.set_xlabel("Lebar (m)"); ax.set_ylabel("Ketebalan (m)")
+    ax.grid(True, linestyle='--', alpha=0.6)
 
 # =====================================================================
 # LOGIKA 5. PONDASI TELAPAK
@@ -293,6 +329,8 @@ elif jenis_bangunan == "5. Pondasi Telapak":
     fig, ax = plt.subplots(figsize=(5, 3))
     ax.add_patch(plt.Rectangle((-p/2, 0), p, t, color='gray'))
     ax.set_xlim(-1, 1); ax.set_ylim(-0.2, 0.5); ax.set_aspect('equal')
+    ax.set_xlabel("Panjang (m)"); ax.set_ylabel("Ketebalan (m)")
+    ax.grid(True, linestyle='--', alpha=0.6)
 
 # =====================================================================
 # LOGIKA 6. DINDING PENAHAN TANAH (STABILISASI TEBING)
@@ -343,6 +381,8 @@ elif jenis_bangunan == "6. Dinding Penahan Tanah (Stabilisasi Tebing)":
         ax.add_patch(plt.Polygon([[0, 0], [l_bawah, 0], [l_atas, h], [0, h]], color='slategray', alpha=0.8))
         ax.plot([0, 0], [0, h], color='saddlebrown', lw=4, label='Tebing/Tanah')
         ax.set_xlim(-0.5, max(l_bawah, l_atas) + 0.5); ax.set_ylim(-0.5, h+0.5); ax.set_aspect('equal')
+        ax.set_xlabel("Lebar (m)"); ax.set_ylabel("Tinggi (m)")
+        ax.grid(True, linestyle='--', alpha=0.6)
         ax.legend(loc='upper right')
 
     elif tipe_dpt == "Pasangan Batu Bertingkat (Terasering)":
@@ -410,7 +450,9 @@ elif jenis_bangunan == "6. Dinding Penahan Tanah (Stabilisasi Tebing)":
         ax.set_xlim(min_x - 1, max_x + 1)
         ax.set_ylim(-0.5, y_off + 1)
         ax.set_aspect('equal')
-        ax.axis('off')
+        ax.set_xlabel("Lebar Kemunduran Terasering (m)")
+        ax.set_ylabel("Tinggi Total (m)")
+        ax.grid(True, linestyle='--', alpha=0.6)
 
     else: # Opsi Beton Bertulang (Cantilever)
         h = st.number_input("Tinggi Dinding (m)", value=4.0, key="6_h")
@@ -452,6 +494,8 @@ elif jenis_bangunan == "6. Dinding Penahan Tanah (Stabilisasi Tebing)":
         ax.add_patch(plt.Rectangle((0.5, 0), 0.4, h, color='darkgray'))
         ax.add_patch(plt.Rectangle((0.9, 0), l_base-0.9, h, color='saddlebrown', alpha=0.3, label='Timbunan Tebing'))
         ax.set_xlim(-0.5, l_base+0.5); ax.set_ylim(-1, h+1); ax.set_aspect('equal')
+        ax.set_xlabel("Lebar (m)"); ax.set_ylabel("Tinggi (m)")
+        ax.grid(True, linestyle='--', alpha=0.6)
         ax.legend(loc='upper right')
 
 # =====================================================================
@@ -493,7 +537,8 @@ elif jenis_bangunan == "7. Pondasi Bore Pile":
     ax.add_patch(plt.Rectangle((-1, -kedalaman), 2, kedalaman, color='saddlebrown', alpha=0.1))
     ax.add_patch(plt.Rectangle((-diameter/2, -kedalaman), diameter, kedalaman, color='gray'))
     ax.set_xlim(-1, 1); ax.set_ylim(-kedalaman-1, 1); ax.set_aspect('equal')
-
+    ax.set_xlabel("Lebar Galian (m)"); ax.set_ylabel("Kedalaman (m)")
+    ax.grid(True, linestyle='--', alpha=0.6)
 
 # =====================================================================
 # BLOK 2: REVIEW ESTIMASI SEMENTARA
