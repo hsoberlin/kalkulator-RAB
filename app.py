@@ -94,24 +94,37 @@ kategori_pekerjaan = jenis_bangunan
 # LOGIKA 0. PEKERJAAN PERSIAPAN
 # =====================================================================
 if jenis_bangunan == "0. Pekerjaan Persiapan":
-    st.markdown("**Item Persiapan (Lump Sum)**")
+    st.markdown("**Item Persiapan**")
     
-    show_survey = st.checkbox("Survey, Pengukuran & Pasang Bowplank", value=True, key="0_cb_surv")
-    h_survey = st.number_input("Biaya Survey (Rp)", value=5000000, key="0_h_surv") if show_survey else 0
+    show_survey = st.checkbox("Pekerjaan Pengukuran & Positioning", value=True, key="0_cb_surv")
+    h_survey = st.number_input("Biaya Pengukuran (Rp)", value=13549401.09, key="0_h_surv") if show_survey else 0
 
-    show_k3 = st.checkbox("Penyelenggaraan SMK3 (K3 Konstruksi)", value=True, key="0_cb_k3")
-    h_k3 = st.number_input("Biaya K3 (Rp)", value=3500000, key="0_h_k3") if show_k3 else 0
+    show_k3 = st.checkbox("Penyelenggaraan SMK3 (K3)", value=True, key="0_cb_k3")
+    h_k3 = st.number_input("Biaya K3 (Rp)", value=43583110.75, key="0_h_k3") if show_k3 else 0
 
-    show_mob = st.checkbox("Mobilisasi & Demobilisasi Alat Berat", value=True, key="0_cb_mob")
-    h_mob = st.number_input("Biaya Mob-Demob (Rp)", value=12000000, key="0_h_mob") if show_mob else 0
+    show_mob = st.checkbox("Mobilisasi & Demobilisasi Alat", value=True, key="0_cb_mob")
+    h_mob = st.number_input("Biaya Mob-Demob (Rp)", value=9865747.23, key="0_h_mob") if show_mob else 0
 
-    show_direksi = st.checkbox("Sewa/Pembuatan Direksi Keet", value=True, key="0_cb_dir")
-    h_direksi = st.number_input("Biaya Direksi Keet (Rp)", value=7500000, key="0_h_dir") if show_direksi else 0
+    show_direksi = st.checkbox("Fasilitas Penunjang Pekerjaan", value=True, key="0_cb_dir")
+    h_direksi = st.number_input("Biaya Fasilitas (Rp)", value=27098802.18, key="0_h_dir") if show_direksi else 0
+    
+    show_desain = st.checkbox("Pekerjaan Desain Enjiniring", value=True, key="0_cb_des")
+    h_desain = st.number_input("Biaya Desain (Rp)", value=55552544.46, key="0_h_des") if show_desain else 0
+    
+    show_admin = st.checkbox("Pekerjaan Administrasi", value=True, key="0_cb_adm")
+    h_admin = st.number_input("Biaya Administrasi (Rp)", value=15600545.83, key="0_h_adm") if show_admin else 0
+    
+    show_sondir = st.checkbox("Pekerjaan Sondir", value=True, key="0_cb_son")
+    vol_sondir = st.number_input("Jumlah Titik Sondir", value=2.0, key="0_v_son") if show_sondir else 0
+    h_sondir = st.number_input("Biaya Sondir (Rp/Titik)", value=2438892.20, key="0_h_son") if show_sondir else 0
 
-    if show_survey: item_to_add.append(["Survey, Pengukuran & Bowplank", 1.0, "LS", h_survey])
-    if show_k3: item_to_add.append(["Penyelenggaraan SMK3", 1.0, "LS", h_k3])
+    if show_desain: item_to_add.append(["Pekerjaan Desain Enjiniring", 1.0, "LS", h_desain])
+    if show_admin: item_to_add.append(["Pekerjaan Administrasi", 1.0, "LS", h_admin])
+    if show_sondir: item_to_add.append(["Pekerjaan Sondir", vol_sondir, "Titik", h_sondir])
+    if show_survey: item_to_add.append(["Pekerjaan Pengukuran dan Positioning", 1.0, "LS", h_survey])
+    if show_k3: item_to_add.append(["Penyelenggaraan SMK3 (K3)", 1.0, "LS", h_k3])
     if show_mob: item_to_add.append(["Mobilisasi & Demobilisasi", 1.0, "LS", h_mob])
-    if show_direksi: item_to_add.append(["Fasilitas Proyek/Direksi Keet", 1.0, "LS", h_direksi])
+    if show_direksi: item_to_add.append(["Fasilitas Penunjang Pekerjaan", 1.0, "LS", h_direksi])
 
     fig, ax = plt.subplots(figsize=(4, 2))
     ax.text(0.5, 0.5, 'Pekerjaan Persiapan & Umum', horizontalalignment='center', verticalalignment='center', fontsize=12, fontweight='bold', color='gray')
@@ -133,14 +146,13 @@ elif jenis_bangunan == "1. Saluran Air (Batu/Beton/Siklop)":
     st.markdown("**Dimensi Saluran**")
     l_atas = st.number_input("Lebar Dalam Atas (m)", value=1.2, key="1_la")
     l_bawah = st.number_input("Lebar Dalam Bawah (m)", value=0.8, key="1_lb")
-    height_saluran = st.number_input("Tinggi Saluran (m)", value=1.5, key="1_t")
+    tinggi = st.number_input("Tinggi Saluran (m)", value=1.5, key="1_t")
     panjang = st.number_input("Panjang Pekerjaan (m)", value=50.0, key="1_p")
     t_atas = st.number_input("Tebal Dinding Atas (m)", value=0.25, key="1_ta")
     t_bawah = st.number_input("Tebal Dinding Bawah (m)", value=0.40, key="1_tb")
     t_dasar = st.number_input("Tebal Lantai Dasar (m)", value=0.30, key="1_td")
 
-    # Hitung Volume Terpisah
-    sisi_miring = np.sqrt(((l_atas - l_bawah) / 2)**2 + height_saluran**2)
+    sisi_miring = np.sqrt(((l_atas - l_bawah) / 2)**2 + tinggi**2)
     vol_1_dinding = ((t_atas + t_bawah) / 2) * sisi_miring * panjang
     vol_lantai_m = l_bawah * t_dasar * panjang
 
@@ -155,50 +167,48 @@ elif jenis_bangunan == "1. Saluran Air (Batu/Beton/Siklop)":
     st.markdown("**Pekerjaan & AHSP**")
     if mode_proyek != "Bangunan Baru":
         p_bongkar = st.slider("Persen Bongkaran Area Rusak (%)", 0, 100, 100, key="1_sl_bongk")
-        show_bongkar = st.checkbox(f"Bongkaran Struktur Eksisting", value=True, key="1_cb_bongk")
-        h_bongkar = st.number_input("AHSP Bongkaran (Rp/m³)", value=250000 if tipe_saluran!="Pasangan Batu" else 150000, key="1_h_bongk") if show_bongkar else 0
-        if show_bongkar: item_to_add.append([f"Bongkaran {tipe_saluran} ({p_bongkar}%)", vol_total*(p_bongkar/100), "m³", h_bongkar])
+        show_bongkar = st.checkbox(f"Pembongkaran Struktur Eksisting", value=True, key="1_cb_bongk")
+        h_bongkar = st.number_input("AHSP Bongkaran (Rp/m³)", value=380080.60, key="1_h_bongk") if show_bongkar else 0
+        if show_bongkar: item_to_add.append([f"Pembongkaran Struktur Eksisting ({p_bongkar}%)", vol_total*(p_bongkar/100), "m³", h_bongkar])
 
-    show_galian = st.checkbox("Galian Tanah", value=True, key="1_cb_gal")
-    vol_gal_kiri = (t_bawah * height_saluran * panjang) if c_kiri else 0
-    vol_gal_kanan = (t_bawah * height_saluran * panjang) if c_kanan else 0
+    show_galian = st.checkbox("Pekerjaan Galian", value=True, key="1_cb_gal")
+    vol_gal_kiri = (t_bawah * tinggi * panjang) if c_kiri else 0
+    vol_gal_kanan = (t_bawah * tinggi * panjang) if c_kanan else 0
     vol_gal_lantai = (l_bawah * t_dasar * panjang) if c_lantai else 0
-    h_galian = st.number_input("AHSP Galian (Rp/m³)", value=75000, key="1_h_gal") if show_galian else 0
-    if show_galian: item_to_add.append(["Galian Tanah Saluran", vol_gal_kiri+vol_gal_kanan+vol_gal_lantai, "m³", h_galian])
+    h_galian = st.number_input("AHSP Galian (Rp/m³)", value=174954.45, key="1_h_gal") if show_galian else 0
+    if show_galian: item_to_add.append(["Pekerjaan Galian", vol_gal_kiri+vol_gal_kanan+vol_gal_lantai, "m³", h_galian])
 
-    # Logika Material
     if tipe_saluran == "Pasangan Batu":
         show_batu = st.checkbox("Pasangan Batu Kali (1:4)", value=True, key="1_cb_batu")
-        h_batu = st.number_input("AHSP Pas. Batu (Rp/m³)", value=950000, key="1_h_batu") if show_batu else 0
+        h_batu = st.number_input("AHSP Pas. Batu (Rp/m³)", value=950000.0, key="1_h_batu") if show_batu else 0
         show_plester = st.checkbox("Plesteran + Acian", value=True, key="1_cb_ples")
-        h_plester = st.number_input("AHSP Plesteran (Rp/m²)", value=65000, key="1_h_ples") if show_plester else 0
+        h_plester = st.number_input("AHSP Plesteran (Rp/m²)", value=65000.0, key="1_h_ples") if show_plester else 0
         
         if show_batu: item_to_add.append(["Pasangan Batu Kali (1:4)", vol_total, "m³", h_batu])
         if show_plester: item_to_add.append(["Plesteran Saluran Dalam", luas_plester_bekisting + luas_plester_lantai, "m²", h_plester])
 
     elif tipe_saluran == "Beton Bertulang":
-        show_bek = st.checkbox("Bekisting Saluran", value=True, key="1_cb_bek")
-        h_bek = st.number_input("AHSP Bekisting (Rp/m²)", value=125000, key="1_h_bek") if show_bek else 0
-        show_cor = st.checkbox("Cor Beton K-225/K-250", value=True, key="1_cb_cor")
-        h_cor = st.number_input("AHSP Cor Beton (Rp/m³)", value=1200000, key="1_h_cor") if show_cor else 0
-        show_besi = st.checkbox("Pembesian", value=True, key="1_cb_besi")
-        r_besi = st.number_input("Rasio Besi (kg/m³)", value=110, key="1_r_besi") if show_besi else 0
-        h_besi = st.number_input("AHSP Besi (Rp/kg)", value=18500, key="1_h_besi") if show_besi else 0
+        show_bek = st.checkbox("Pekerjaan Bekisting", value=True, key="1_cb_bek")
+        h_bek = st.number_input("AHSP Bekisting (Rp/m²)", value=316349.06, key="1_h_bek") if show_bek else 0
+        show_cor = st.checkbox("Beton", value=True, key="1_cb_cor")
+        h_cor = st.number_input("AHSP Beton (Rp/m³)", value=1723402.09, key="1_h_cor") if show_cor else 0
+        show_besi = st.checkbox("Tulangan Utama D16-200", value=True, key="1_cb_besi")
+        r_besi = st.number_input("Rasio Besi (kg/m³)", value=110.0, key="1_r_besi") if show_besi else 0
+        h_besi = st.number_input("AHSP Besi (Rp/kg)", value=23662.00, key="1_h_besi") if show_besi else 0
 
-        if show_bek: item_to_add.append(["Bekisting Permukaan Saluran", luas_plester_bekisting, "m²", h_bek])
-        if show_cor: item_to_add.append(["Cor Beton Struktur Saluran", vol_total, "m³", h_cor])
-        if show_besi: item_to_add.append(["Pembesian Saluran", vol_total * r_besi, "kg", h_besi])
+        if show_bek: item_to_add.append(["Pekerjaan Bekisting Saluran", luas_plester_bekisting, "m²", h_bek])
+        if show_cor: item_to_add.append(["Beton Struktur Saluran", vol_total, "m³", h_cor])
+        if show_besi: item_to_add.append(["Tulangan Utama D16-200 Saluran", vol_total * r_besi, "kg", h_besi])
 
     elif tipe_saluran == "Beton Siklop":
-        show_bek = st.checkbox("Bekisting Saluran Siklop", value=True, key="1_cb_bek")
-        h_bek = st.number_input("AHSP Bekisting (Rp/m²)", value=125000, key="1_h_bek") if show_bek else 0
-        show_cor = st.checkbox("Cor Beton Siklop (60% Beton : 40% Batu)", value=True, key="1_cb_cor")
-        h_cor = st.number_input("AHSP Cor Siklop (Rp/m³)", value=1050000, key="1_h_cor") if show_cor else 0
+        show_bek = st.checkbox("Pekerjaan Bekisting", value=True, key="1_cb_bek")
+        h_bek = st.number_input("AHSP Bekisting (Rp/m²)", value=316349.06, key="1_h_bek") if show_bek else 0
+        show_cor = st.checkbox("Beton Siklop", value=True, key="1_cb_cor")
+        h_cor = st.number_input("AHSP Beton Siklop (Rp/m³)", value=1723402.09, key="1_h_cor") if show_cor else 0
 
-        if show_bek: item_to_add.append(["Bekisting Permukaan Saluran Siklop", luas_plester_bekisting, "m²", h_bek])
-        if show_cor: item_to_add.append(["Cor Beton Siklop Saluran", vol_total, "m³", h_cor])
+        if show_bek: item_to_add.append(["Pekerjaan Bekisting Saluran Siklop", luas_plester_bekisting, "m²", h_bek])
+        if show_cor: item_to_add.append(["Beton Siklop Saluran", vol_total, "m³", h_cor])
 
-    # Plot Saluran Terpisah
     fig, ax = plt.subplots(figsize=(6, 4))
     x_kiri = -l_bawah/2
     x_kanan = l_bawah/2
@@ -208,20 +218,17 @@ elif jenis_bangunan == "1. Saluran Air (Batu/Beton/Siklop)":
     col_kanan = 'saddlebrown' if c_kanan else '#e0e0e0'
     col_lantai = 'saddlebrown' if c_lantai else '#e0e0e0'
 
-    # Dinding Kiri
-    pts_kiri = [[x_kiri, 0], [x_kiri - t_bawah, 0], [x_kiri - dx_atas - t_atas, height_saluran], [x_kiri - dx_atas, height_saluran]]
+    pts_kiri = [[x_kiri, 0], [x_kiri - t_bawah, 0], [x_kiri - dx_atas - t_atas, tinggi], [x_kiri - dx_atas, tinggi]]
     ax.add_patch(plt.Polygon(pts_kiri, color=col_kiri, ec='black', alpha=0.8))
-    # Dinding Kanan
-    pts_kanan = [[x_kanan, 0], [x_kanan + t_bawah, 0], [x_kanan + dx_atas + t_atas, height_saluran], [x_kanan + dx_atas, height_saluran]]
+    pts_kanan = [[x_kanan, 0], [x_kanan + t_bawah, 0], [x_kanan + dx_atas + t_atas, tinggi], [x_kanan + dx_atas, tinggi]]
     ax.add_patch(plt.Polygon(pts_kanan, color=col_kanan, ec='black', alpha=0.8))
-    # Lantai
     pts_lantai = [[x_kiri, 0], [x_kanan, 0], [x_kanan, -t_dasar], [x_kiri, -t_dasar]]
     ax.add_patch(plt.Polygon(pts_lantai, color=col_lantai, ec='black', alpha=0.8))
 
-    ax.text(0, height_saluran/2, f'Ruang Air\nL:{l_atas}m', ha='center', va='center', color='blue', alpha=0.5)
+    ax.text(0, tinggi/2, f'Ruang Air\nL:{l_atas}m', ha='center', va='center', color='blue', alpha=0.5)
     
     ax.set_xlim(-l_atas/2 - max(t_atas, t_bawah) - 0.5, l_atas/2 + max(t_atas, t_bawah) + 0.5)
-    ax.set_ylim(-t_dasar - 0.5, height_saluran + 0.5)
+    ax.set_ylim(-t_dasar - 0.5, tinggi + 0.5)
     ax.set_aspect('equal')
     ax.set_xlabel("Lebar Saluran (m)")
     ax.set_ylabel("Tinggi/Kedalaman (m)")
@@ -239,24 +246,29 @@ elif jenis_bangunan == "2. Jalan Perkerasan Lentur (Aspal)":
 
     st.markdown("**Pekerjaan & AHSP**")
     if mode_proyek == "Bangunan Baru":
-        show_grading = st.checkbox("Penyiapan Badan Jalan", value=True, key="2_cb_grad")
-        h_grading = st.number_input("AHSP Penyiapan (Rp/m²)", value=12000, key="2_h_grad") if show_grading else 0
-        show_base = st.checkbox("Lapis Pondasi Agregat A", value=True, key="2_cb_base")
-        h_base = st.number_input("AHSP Agregat A (Rp/m³)", value=450000, key="2_h_base") if show_base else 0
-        if show_grading: item_to_add.append(["Penyiapan Badan Jalan", lebar * panjang, "m²", h_grading])
-        if show_base: item_to_add.append(["Lapis Pondasi Agregat A", lebar * panjang * t_base, "m³", h_base])
+        show_grading = st.checkbox("Pekerjaan Pemadatan Tanah / Badan Jalan", value=True, key="2_cb_grad")
+        h_grading = st.number_input("AHSP Pemadatan (Rp/m²)", value=98640.49, key="2_h_grad") if show_grading else 0
+        show_base = st.checkbox("Pekerjaan Lapis Pondasi A", value=True, key="2_cb_base")
+        h_base = st.number_input("AHSP Lapis Pondasi A (Rp/m³)", value=527814.19, key="2_h_base") if show_base else 0
+        if show_grading: item_to_add.append(["Pekerjaan Pemadatan Tanah / Badan Jalan", lebar * panjang, "m²", h_grading])
+        if show_base: item_to_add.append(["Pekerjaan Lapis Pondasi A", lebar * panjang * t_base, "m³", h_base])
     else:
         p_bongkar = st.slider("Persen Area Dikupas (%)", 0, 100, 100, key="2_sl_bongk")
-        show_milling = st.checkbox("Cold Milling (Kupas Aspal)", value=True, key="2_cb_mill")
-        h_milling = st.number_input("AHSP Milling (Rp/m³)", value=350000, key="2_h_mill") if show_milling else 0
+        show_milling = st.checkbox("Pembongkaran dan Pengangkutan Bongkaran Jalan", value=True, key="2_cb_mill")
+        h_milling = st.number_input("AHSP Bongkaran Jalan (Rp/m³)", value=380080.60, key="2_h_mill") if show_milling else 0
         show_tack = st.checkbox("Lapis Perekat (Tack Coat)", value=True, key="2_cb_tack")
-        h_tack = st.number_input("AHSP Tack Coat (Rp/Liter)", value=15000, key="2_h_tack") if show_tack else 0
-        if show_milling: item_to_add.append([f"Cold Milling Kupas Aspal ({p_bongkar}%)", (lebar * panjang * t_aspal) * (p_bongkar/100), "m³", h_milling])
+        h_tack = st.number_input("AHSP Tack Coat (Rp/Liter)", value=15000.0, key="2_h_tack") if show_tack else 0
+        if show_milling: item_to_add.append([f"Pembongkaran dan Pengangkutan Bongkaran Jalan Eksisting ({p_bongkar}%)", (lebar * panjang * t_aspal) * (p_bongkar/100), "m³", h_milling])
         if show_tack: item_to_add.append(["Lapis Perekat (Tack Coat)", lebar * panjang * 0.35, "Liter", h_tack])
 
     show_aspal = st.checkbox("Aspal Hotmix AC-WC", value=True, key="2_cb_asp")
-    h_aspal = st.number_input("AHSP Aspal (Rp/m³)", value=2500000, key="2_h_asp") if show_aspal else 0
+    h_aspal = st.number_input("AHSP Aspal (Rp/m³)", value=2500000.0, key="2_h_asp") if show_aspal else 0
     if show_aspal: item_to_add.append(["Aspal Hotmix AC-WC", lebar * panjang * t_aspal, "m³", h_aspal])
+    
+    show_guard = st.checkbox("Pemasangan Guard Rail", value=False, key="2_cb_gr")
+    panjang_gr = st.number_input("Panjang Guard Rail (m')", value=100.0, key="2_p_gr") if show_guard else 0
+    h_guard = st.number_input("AHSP Guard Rail (Rp/m')", value=2941333.18, key="2_h_gr") if show_guard else 0
+    if show_guard: item_to_add.append(["Pemasangan Guard Rail", panjang_gr, "m'", h_guard])
 
     fig, ax = plt.subplots(figsize=(5, 3))
     ax.add_patch(plt.Rectangle((0, -t_aspal), lebar, t_aspal, color='black'))
@@ -277,29 +289,34 @@ elif jenis_bangunan == "3. Jalan Perkerasan Kaku (Rigid)":
 
     st.markdown("**Pekerjaan & AHSP**")
     if mode_proyek == "Bangunan Baru":
-        show_grading = st.checkbox("Penyiapan Badan Jalan", value=True, key="3_cb_grad")
-        h_grading = st.number_input("AHSP Penyiapan (Rp/m²)", value=12000, key="3_h_grad") if show_grading else 0
-        if show_grading: item_to_add.append(["Penyiapan Badan Jalan", lebar * panjang, "m²", h_grading])
+        show_grading = st.checkbox("Pekerjaan Pemadatan Tanah / Badan Jalan", value=True, key="3_cb_grad")
+        h_grading = st.number_input("AHSP Pemadatan (Rp/m²)", value=98640.49, key="3_h_grad") if show_grading else 0
+        if show_grading: item_to_add.append(["Pekerjaan Pemadatan Tanah / Badan Jalan", lebar * panjang, "m²", h_grading])
     else:
         p_bongkar = st.slider("Persen Bongkaran (%)", 0, 100, 100, key="3_sl_bongk")
-        show_bongkar = st.checkbox("Bongkaran Rigid Eksisting", value=True, key="3_cb_bongk")
-        h_bongkar = st.number_input("AHSP Bongkaran Rigid (Rp/m³)", value=450000, key="3_h_bongk") if show_bongkar else 0
-        if show_bongkar: item_to_add.append([f"Bongkaran Rigid Eksisting ({p_bongkar}%)", (lebar * panjang * t_rigid) * (p_bongkar/100), "m³", h_bongkar])
+        show_bongkar = st.checkbox("Pembongkaran Jalan Eksisting", value=True, key="3_cb_bongk")
+        h_bongkar = st.number_input("AHSP Bongkaran (Rp/m³)", value=380080.60, key="3_h_bongk") if show_bongkar else 0
+        if show_bongkar: item_to_add.append([f"Pembongkaran dan Pengangkutan Bongkaran Jalan Eksisting ({p_bongkar}%)", (lebar * panjang * t_rigid) * (p_bongkar/100), "m³", h_bongkar])
 
-    show_lc = st.checkbox("Lantai Kerja (LC)", value=True, key="3_cb_lc")
-    h_lc = st.number_input("AHSP Lantai Kerja (Rp/m³)", value=950000, key="3_h_lc") if show_lc else 0
-    show_bekisting = st.checkbox("Bekisting Sisi Jalan", value=True, key="3_cb_bek")
-    h_bekisting = st.number_input("AHSP Bekisting (Rp/m²)", value=125000, key="3_h_bek") if show_bekisting else 0
-    show_rigid = st.checkbox("Beton Rigid K-350", value=True, key="3_cb_rig")
-    h_rigid = st.number_input("AHSP Beton Rigid (Rp/m³)", value=1450000, key="3_h_rig") if show_rigid else 0
-    show_besi = st.checkbox("Pembesian (Dowel/Wiremesh)", value=True, key="3_cb_besi")
-    r_besi = st.number_input("Rasio Besi (kg/m³)", value=60, key="3_r_besi") if show_besi else 0
-    h_besi = st.number_input("AHSP Besi (Rp/kg)", value=18500, key="3_h_besi") if show_besi else 0
+    show_lc = st.checkbox("Pekerjaan Lean Concrete (K125)", value=True, key="3_cb_lc")
+    h_lc = st.number_input("AHSP Lean Concrete (Rp/m³)", value=1598159.55, key="3_h_lc") if show_lc else 0
+    show_bekisting = st.checkbox("Pekerjaan Bekisting", value=True, key="3_cb_bek")
+    h_bekisting = st.number_input("AHSP Bekisting (Rp/m²)", value=316349.06, key="3_h_bek") if show_bekisting else 0
+    show_rigid = st.checkbox("Pekerjaan Beton FS 45", value=True, key="3_cb_rig")
+    h_rigid = st.number_input("AHSP Beton FS 45 (Rp/m³)", value=2029697.10, key="3_h_rig") if show_rigid else 0
+    show_wiremesh = st.checkbox("Pekerjaan Wiremesh M10 / Dowel", value=True, key="3_cb_besi")
+    h_wiremesh = st.number_input("AHSP Wiremesh/Dowel", value=21973.22, key="3_h_besi") if show_wiremesh else 0
+    r_besi = st.number_input("Estimasi Kebutuhan Besi Rigid", value=1.0, key="3_r_besi") if show_wiremesh else 0
 
-    if show_lc: item_to_add.append(["Lantai Kerja (LC)", lebar * panjang * t_lc, "m³", h_lc])
-    if show_bekisting: item_to_add.append(["Bekisting Sisi Jalan", (t_rigid + t_lc) * panjang * 2, "m²", h_bekisting])
-    if show_rigid: item_to_add.append(["Beton Rigid K-350", lebar * panjang * t_rigid, "m³", h_rigid])
-    if show_besi: item_to_add.append(["Pembesian (Dowel/Wiremesh)", (lebar * panjang * t_rigid) * r_besi, "kg", h_besi])
+    if show_lc: item_to_add.append(["Pekerjaan Lean Concrete (K125)", lebar * panjang * t_lc, "m³", h_lc])
+    if show_bekisting: item_to_add.append(["Pekerjaan Bekisting", (t_rigid + t_lc) * panjang * 2, "m²", h_bekisting])
+    if show_rigid: item_to_add.append(["Pekerjaan Beton FS 45", lebar * panjang * t_rigid, "m³", h_rigid])
+    if show_wiremesh: item_to_add.append(["Pekerjaan Wiremesh M10 / Pemasangan Dowel", r_besi, "Satuan", h_wiremesh])
+
+    show_guard = st.checkbox("Pemasangan Guard Rail", value=False, key="3_cb_gr")
+    panjang_gr = st.number_input("Panjang Guard Rail (m')", value=100.0, key="3_p_gr") if show_guard else 0
+    h_guard = st.number_input("AHSP Guard Rail (Rp/m')", value=2941333.18, key="3_h_gr") if show_guard else 0
+    if show_guard: item_to_add.append(["Pemasangan Guard Rail", panjang_gr, "m'", h_guard])
 
     fig, ax = plt.subplots(figsize=(5, 3))
     ax.add_patch(plt.Rectangle((0, 0), lebar, t_rigid, color='gray', hatch='//'))
@@ -323,27 +340,27 @@ elif jenis_bangunan == "4. Pondasi Telapak":
     st.markdown("**Pekerjaan & AHSP**")
     if mode_proyek != "Bangunan Baru":
         p_bongkar = st.slider("Persen Bongkaran (%)", 0, 100, 100, key="4_sl_bongk")
-        show_bongkar = st.checkbox("Bongkaran Struktur Lama", value=True, key="4_cb_bongk")
-        h_bongkar = st.number_input("AHSP Bongkaran (Rp/m³)", value=350000, key="4_h_bongk") if show_bongkar else 0
-        if show_bongkar: item_to_add.append([f"Bongkaran Struktur Lama ({p_bongkar}%)", vol_beton * (p_bongkar/100), "m³", h_bongkar])
+        show_bongkar = st.checkbox("Pembongkaran Struktur Eksisting", value=True, key="4_cb_bongk")
+        h_bongkar = st.number_input("AHSP Bongkaran (Rp/m³)", value=380080.60, key="4_h_bongk") if show_bongkar else 0
+        if show_bongkar: item_to_add.append([f"Pembongkaran Struktur Eksisting ({p_bongkar}%)", vol_beton * (p_bongkar/100), "m³", h_bongkar])
 
-    show_galian = st.checkbox("Galian Tanah Pondasi", value=True, key="4_cb_gal")
-    h_galian = st.number_input("AHSP Galian (Rp/m³)", value=75000, key="4_h_gal") if show_galian else 0
-    show_lc = st.checkbox("Lantai Kerja Pondasi", value=True, key="4_cb_lc")
-    h_lc = st.number_input("AHSP Lantai Kerja (Rp/m³)", value=950000, key="4_h_lc") if show_lc else 0
-    show_bekisting = st.checkbox("Bekisting Plat Pondasi", value=True, key="4_cb_bek")
-    h_bekisting = st.number_input("AHSP Bekisting (Rp/m²)", value=145000, key="4_h_bek") if show_bekisting else 0
-    show_cor = st.checkbox("Beton Plat Pondasi", value=True, key="4_cb_cor")
-    h_cor = st.number_input("AHSP Beton (Rp/m³)", value=4500000, key="4_h_cor") if show_cor else 0
-    show_besi = st.checkbox("Pembesian Pondasi", value=True, key="4_cb_besi")
-    r_besi = st.number_input("Rasio Besi (kg/m³)", value=150, key="4_r_besi") if show_besi else 0
-    h_besi = st.number_input("AHSP Besi (Rp/kg)", value=18500, key="4_h_besi") if show_besi else 0
+    show_galian = st.checkbox("Pekerjaan Galian", value=True, key="4_cb_gal")
+    h_galian = st.number_input("AHSP Galian (Rp/m³)", value=174954.45, key="4_h_gal") if show_galian else 0
+    show_lc = st.checkbox("Pekerjaan Lean Concrete (K125)", value=True, key="4_cb_lc")
+    h_lc = st.number_input("AHSP Lean Concrete (Rp/m³)", value=1598159.55, key="4_h_lc") if show_lc else 0
+    show_bekisting = st.checkbox("Pekerjaan Bekisting", value=True, key="4_cb_bek")
+    h_bekisting = st.number_input("AHSP Bekisting (Rp/m²)", value=316349.06, key="4_h_bek") if show_bekisting else 0
+    show_cor = st.checkbox("Beton", value=True, key="4_cb_cor")
+    h_cor = st.number_input("AHSP Beton (Rp/m³)", value=1723402.09, key="4_h_cor") if show_cor else 0
+    show_besi = st.checkbox("Tulangan Utama D16-200", value=True, key="4_cb_besi")
+    r_besi = st.number_input("Rasio Besi (kg/m³)", value=150.0, key="4_r_besi") if show_besi else 0
+    h_besi = st.number_input("AHSP Besi (Rp/kg)", value=23662.00, key="4_h_besi") if show_besi else 0
 
-    if show_galian: item_to_add.append(["Galian Tanah Pondasi", (p+0.4)*(l+0.4)*t*jml, "m³", h_galian])
-    if show_lc: item_to_add.append(["Lantai Kerja Pondasi", p*l*0.05*jml, "m³", h_lc])
-    if show_bekisting: item_to_add.append(["Bekisting Plat Pondasi", (p+l)*2*t*jml, "m²", h_bekisting])
+    if show_galian: item_to_add.append(["Pekerjaan Galian Pondasi", (p+0.4)*(l+0.4)*t*jml, "m³", h_galian])
+    if show_lc: item_to_add.append(["Pekerjaan Lean Concrete (K125)", p*l*0.05*jml, "m³", h_lc])
+    if show_bekisting: item_to_add.append(["Pekerjaan Bekisting Plat Pondasi", (p+l)*2*t*jml, "m²", h_bekisting])
     if show_cor: item_to_add.append(["Beton Plat Pondasi", vol_beton, "m³", h_cor])
-    if show_besi: item_to_add.append(["Pembesian Pondasi", vol_beton * r_besi, "kg", h_besi])
+    if show_besi: item_to_add.append(["Tulangan Utama D16-200 Pondasi", vol_beton * r_besi, "kg", h_besi])
 
     fig, ax = plt.subplots(figsize=(5, 3))
     ax.add_patch(plt.Rectangle((-p/2, 0), p, t, color='gray'))
@@ -369,57 +386,88 @@ elif jenis_bangunan == "5. Dinding Penahan Tanah (Stabilisasi Tebing)":
 
     if tipe_dpt in ["Pasangan Batu (Gravity Wall)", "Beton Siklop (Gravity Wall)"]:
         is_siklop = "Siklop" in tipe_dpt
-        h = st.number_input("Tinggi Dinding (m)", value=4.0, key="5_h")
+        st.markdown("**Dimensi DPT Gravity Wall**")
+        h = st.number_input("Tinggi Dinding (m)", value=4.0, key="5_g_h")
+        l_bawah = st.number_input("Lebar Dasar/Bawah (m)", value=1.5, key="5_g_lb")
         l_atas = st.number_input("Lebar Atas (m)", value=0.4, key="5_g_la")
-        l_bawah = st.number_input("Lebar Bawah (m)", value=1.5, key="5_g_lb")
+        offset_depan = st.number_input("Kemiringan Sisi Depan (m)", value=0.3, help="Jarak horizontal kemiringan dari ujung bawah ke ujung atas sisi depan.", key="5_g_off")
         
         vol_material = ((l_atas + l_bawah) / 2) * h * panjang
-        sisi_miring = np.sqrt(h**2 + (l_bawah - l_atas)**2)
-        luas_sisi_luar = sisi_miring * panjang
+        
+        # Hitung sisi miring untuk kebutuhan luasan plesteran/bekisting
+        sisi_miring_depan = np.sqrt(h**2 + offset_depan**2)
+        offset_belakang = l_bawah - offset_depan - l_atas
+        sisi_miring_belakang = np.sqrt(h**2 + offset_belakang**2)
+        luas_sisi_luar = (sisi_miring_depan + sisi_miring_belakang) * panjang
+        
         vol_galian = l_bawah * h * panjang
         
         st.markdown("**Pekerjaan & AHSP**")
         if mode_proyek != "Bangunan Baru":
             p_bongkar = st.slider("Persen Bongkaran (%)", 0, 100, 100, key="5_g_sl_bongk")
-            show_bongkar = st.checkbox("Bongkaran Struktur Lama", value=True, key="5_g_cb_bongk")
-            h_bongkar = st.number_input("AHSP Bongkaran (Rp/m³)", value=350000 if is_siklop else 150000, key="5_g_h_bongk") if show_bongkar else 0
-            if show_bongkar: item_to_add.append([f"Bongkaran DPT Eksisting ({p_bongkar}%)", vol_material * (p_bongkar/100), "m³", h_bongkar])
+            show_bongkar = st.checkbox("Pembongkaran Struktur Eksisting", value=True, key="5_g_cb_bongk")
+            h_bongkar = st.number_input("AHSP Bongkaran (Rp/m³)", value=380080.60, key="5_g_h_bongk") if show_bongkar else 0
+            if show_bongkar: item_to_add.append([f"Pembongkaran Struktur Eksisting ({p_bongkar}%)", vol_material * (p_bongkar/100), "m³", h_bongkar])
 
-        show_galian = st.checkbox("Galian Tanah Tebing", value=True, key="5_g_cb_gal")
-        h_galian = st.number_input("AHSP Galian (Rp/m³)", value=75000, key="5_g_h_gal") if show_galian else 0
+        show_galian = st.checkbox("Pekerjaan Galian", value=True, key="5_g_cb_gal")
+        h_galian = st.number_input("AHSP Galian (Rp/m³)", value=174954.45, key="5_g_h_gal") if show_galian else 0
+        
+        show_timbunan = st.checkbox("Pekerjaan Urugan Kembali (Backfill)", value=True, key="5_g_cb_timb")
+        h_timbunan = st.number_input("AHSP Urugan (Rp/m³)", value=94351.17, key="5_g_h_timb") if show_timbunan else 0
+        
+        # Volume timbunan wedge di sisi belakang dinding
+        vol_timbunan = (0.5 * offset_belakang * h * panjang) if offset_belakang > 0 else 0
         
         if not is_siklop:
             show_mat = st.checkbox("Pasangan Batu Kali (1:4)", value=True, key="5_g_cb_mat")
-            h_mat = st.number_input("AHSP Pasangan Batu (Rp/m³)", value=950000, key="5_g_h_mat") if show_mat else 0
+            h_mat = st.number_input("AHSP Pasangan Batu (Rp/m³)", value=950000.0, key="5_g_h_mat") if show_mat else 0
             show_plester = st.checkbox("Plesteran & Siaran DPT", value=True, key="5_g_cb_ples")
-            h_plester = st.number_input("AHSP Plesteran (Rp/m²)", value=65000, key="5_g_h_ples") if show_plester else 0
+            h_plester = st.number_input("AHSP Plesteran (Rp/m²)", value=65000.0, key="5_g_h_ples") if show_plester else 0
             
-            if show_galian: item_to_add.append(["Galian Tanah Tebing", vol_galian, "m³", h_galian])
+            if show_galian: item_to_add.append(["Pekerjaan Galian Tebing", vol_galian, "m³", h_galian])
             if show_mat: item_to_add.append(["Pasangan Batu Kali (1:4)", vol_material, "m³", h_mat])
             if show_plester: item_to_add.append(["Plesteran & Siaran Permukaan", luas_sisi_luar, "m²", h_plester])
+            if show_timbunan: item_to_add.append(["Pekerjaan Urugan Kembali (Backfill)", vol_timbunan, "m³", h_timbunan])
         else:
-            show_bekisting = st.checkbox("Bekisting DPT Siklop", value=True, key="5_g_cb_bek")
-            h_bekisting = st.number_input("AHSP Bekisting (Rp/m²)", value=125000, key="5_g_h_bek") if show_bekisting else 0
-            show_mat = st.checkbox("Cor Beton Siklop", value=True, key="5_g_cb_mat")
-            h_mat = st.number_input("AHSP Beton Siklop (Rp/m³)", value=1050000, key="5_g_h_mat") if show_mat else 0
+            show_bekisting = st.checkbox("Pekerjaan Bekisting", value=True, key="5_g_cb_bek")
+            h_bekisting = st.number_input("AHSP Bekisting (Rp/m²)", value=316349.06, key="5_g_h_bek") if show_bekisting else 0
+            show_mat = st.checkbox("Beton Siklop", value=True, key="5_g_cb_mat")
+            h_mat = st.number_input("AHSP Beton Siklop (Rp/m³)", value=1723402.09, key="5_g_h_mat") if show_mat else 0
             
-            if show_galian: item_to_add.append(["Galian Tanah Tebing", vol_galian, "m³", h_galian])
-            if show_bekisting: item_to_add.append(["Bekisting Permukaan DPT Siklop", luas_sisi_luar, "m²", h_bekisting])
-            if show_mat: item_to_add.append(["Cor Beton Siklop DPT", vol_material, "m³", h_mat])
+            if show_galian: item_to_add.append(["Pekerjaan Galian Tebing", vol_galian, "m³", h_galian])
+            if show_bekisting: item_to_add.append(["Pekerjaan Bekisting DPT Siklop", luas_sisi_luar, "m²", h_bekisting])
+            if show_mat: item_to_add.append(["Beton Siklop DPT", vol_material, "m³", h_mat])
+            if show_timbunan: item_to_add.append(["Pekerjaan Urugan Kembali (Backfill)", vol_timbunan, "m³", h_timbunan])
 
         show_suling = st.checkbox("Pipa Suling-Suling PVC 2\" + Ijuk", value=True, key="5_g_cb_suling")
-        h_suling = st.number_input("AHSP Suling-suling (Rp/Titik)", value=45000, key="5_g_h_suling") if show_suling else 0
+        h_suling = st.number_input("AHSP Suling-suling (Rp/Titik)", value=45000.0, key="5_g_h_suling") if show_suling else 0
         if show_suling: item_to_add.append(["Instalasi Pipa Suling PVC 2\" + Ijuk", (luas_sisi_luar/2), "Titik", h_suling])
 
-        fig, ax = plt.subplots(figsize=(5, 4))
-        ax.add_patch(plt.Polygon([[0, 0], [l_bawah, 0], [l_atas, h], [0, h]], color='#8b9ea8' if is_siklop else 'slategray', alpha=0.9))
-        ax.plot([0, 0], [0, h], color='saddlebrown', lw=4, label='Tebing/Tanah')
+        # Visualisasi
+        fig, ax = plt.subplots(figsize=(6, 5))
+        pts_dinding = [
+            [0, 0], 
+            [l_bawah, 0], 
+            [offset_depan + l_atas, h], 
+            [offset_depan, h]
+        ]
+        ax.add_patch(plt.Polygon(pts_dinding, color='#8b9ea8' if is_siklop else 'slategray', ec='black', alpha=0.9))
         
-        ax.text(l_bawah/2, 0.1, f'{l_bawah}m', ha='center', va='bottom', fontsize=9, color='white')
-        ax.text(l_atas/2, h - 0.3, f'{l_atas}m', ha='center', va='top', fontsize=9, color='white')
+        lebar_timbunan = max(1.0, offset_belakang + 0.5)
+        pts_timbunan = [
+            [l_bawah, 0],
+            [l_bawah + lebar_timbunan, 0],
+            [l_bawah + lebar_timbunan, h],
+            [offset_depan + l_atas, h]
+        ]
+        ax.add_patch(plt.Polygon(pts_timbunan, color='saddlebrown', alpha=0.3, label='Timbunan Tebing'))
+        ax.plot([-0.5, l_bawah + lebar_timbunan], [0, 0], color='saddlebrown', lw=3)
         
-        ax.set_xlim(-0.5, max(l_bawah, l_atas) + 0.5); ax.set_ylim(-0.5, h+0.5); ax.set_aspect('equal')
-        ax.set_xlabel("Lebar Struktur (m)"); ax.set_ylabel("Tinggi Total (m)")
+        ax.text(l_bawah/2, 0.2, f'{l_bawah}m', ha='center', va='bottom', fontsize=9, color='white')
+        ax.text(offset_depan + l_atas/2, h - 0.3, f'{l_atas}m', ha='center', va='top', fontsize=9, color='white')
+        
+        ax.set_xlim(-1.0, l_bawah + lebar_timbunan + 0.5); ax.set_ylim(-0.5, h+1.0); ax.set_aspect('equal')
+        ax.set_xlabel("Lebar Struktur (m)"); ax.set_ylabel("Tinggi/Elevasi (m)")
         ax.grid(True, linestyle='--', alpha=0.6); ax.legend(loc='upper right')
 
     elif tipe_dpt in ["Pasangan Batu Bertingkat (Terasering)", "Beton Siklop Bertingkat (Terasering)"]:
@@ -442,34 +490,34 @@ elif jenis_bangunan == "5. Dinding Penahan Tanah (Stabilisasi Tebing)":
         st.markdown("**Pekerjaan & AHSP**")
         if mode_proyek != "Bangunan Baru":
             p_bongkar = st.slider("Persen Bongkaran (%)", 0, 100, 100, key="5_ter_sl_bongk")
-            show_bongkar = st.checkbox("Bongkaran DPT Lama", value=True, key="5_ter_cb_bongk")
-            h_bongkar = st.number_input("AHSP Bongkaran (Rp/m³)", value=350000 if is_siklop else 150000, key="5_ter_h_bongk") if show_bongkar else 0
-            if show_bongkar: item_to_add.append([f"Bongkaran DPT Eksisting ({p_bongkar}%)", vol_total_mat * (p_bongkar/100), "m³", h_bongkar])
+            show_bongkar = st.checkbox("Pembongkaran Struktur Eksisting", value=True, key="5_ter_cb_bongk")
+            h_bongkar = st.number_input("AHSP Bongkaran (Rp/m³)", value=380080.60, key="5_ter_h_bongk") if show_bongkar else 0
+            if show_bongkar: item_to_add.append([f"Pembongkaran Struktur Eksisting ({p_bongkar}%)", vol_total_mat * (p_bongkar/100), "m³", h_bongkar])
 
-        show_galian = st.checkbox("Galian Tanah Tebing", value=True, key="5_ter_cb_gal")
-        h_galian = st.number_input("AHSP Galian (Rp/m³)", value=75000, key="5_ter_h_gal") if show_galian else 0
+        show_galian = st.checkbox("Pekerjaan Galian", value=True, key="5_ter_cb_gal")
+        h_galian = st.number_input("AHSP Galian (Rp/m³)", value=174954.45, key="5_ter_h_gal") if show_galian else 0
         
         if not is_siklop:
             show_mat = st.checkbox("Pasangan Batu Kali (1:4)", value=True, key="5_ter_cb_mat")
-            h_mat = st.number_input("AHSP Pasangan Batu (Rp/m³)", value=950000, key="5_ter_h_mat") if show_mat else 0
+            h_mat = st.number_input("AHSP Pasangan Batu (Rp/m³)", value=950000.0, key="5_ter_h_mat") if show_mat else 0
             show_plester = st.checkbox("Plesteran & Siaran DPT", value=True, key="5_ter_cb_ples")
-            h_plester = st.number_input("AHSP Plesteran (Rp/m²)", value=65000, key="5_ter_h_ples") if show_plester else 0
+            h_plester = st.number_input("AHSP Plesteran (Rp/m²)", value=65000.0, key="5_ter_h_ples") if show_plester else 0
             
-            if show_galian: item_to_add.append(["Galian Tanah Tebing (Terasering)", vol_galian, "m³", h_galian])
+            if show_galian: item_to_add.append(["Pekerjaan Galian Tebing (Terasering)", vol_galian, "m³", h_galian])
             if show_mat: item_to_add.append(["Pasangan Batu Kali (Terasering)", vol_total_mat, "m³", h_mat])
             if show_plester: item_to_add.append(["Plesteran & Siaran Permukaan (Termasuk Berm)", luas_sisi_luar, "m²", h_plester])
         else:
-            show_bekisting = st.checkbox("Bekisting Terasering Siklop", value=True, key="5_ter_cb_bek")
-            h_bekisting = st.number_input("AHSP Bekisting (Rp/m²)", value=125000, key="5_ter_h_bek") if show_bekisting else 0
-            show_mat = st.checkbox("Cor Beton Siklop Terasering", value=True, key="5_ter_cb_mat")
-            h_mat = st.number_input("AHSP Beton Siklop (Rp/m³)", value=1050000, key="5_ter_h_mat") if show_mat else 0
+            show_bekisting = st.checkbox("Pekerjaan Bekisting", value=True, key="5_ter_cb_bek")
+            h_bekisting = st.number_input("AHSP Bekisting (Rp/m²)", value=316349.06, key="5_ter_h_bek") if show_bekisting else 0
+            show_mat = st.checkbox("Beton Siklop", value=True, key="5_ter_cb_mat")
+            h_mat = st.number_input("AHSP Beton Siklop (Rp/m³)", value=1723402.09, key="5_ter_h_mat") if show_mat else 0
 
-            if show_galian: item_to_add.append(["Galian Tanah Tebing (Terasering)", vol_galian, "m³", h_galian])
-            if show_bekisting: item_to_add.append(["Bekisting Permukaan Siklop Terasering (Sisi Miring & Berm)", luas_sisi_luar, "m²", h_bekisting])
-            if show_mat: item_to_add.append(["Cor Beton Siklop Terasering", vol_total_mat, "m³", h_mat])
+            if show_galian: item_to_add.append(["Pekerjaan Galian Tebing (Terasering)", vol_galian, "m³", h_galian])
+            if show_bekisting: item_to_add.append(["Pekerjaan Bekisting Terasering Siklop", luas_sisi_luar, "m²", h_bekisting])
+            if show_mat: item_to_add.append(["Beton Siklop Terasering", vol_total_mat, "m³", h_mat])
 
         show_suling = st.checkbox("Pipa Suling-Suling PVC 2\" + Ijuk", value=True, key="5_ter_cb_suling")
-        h_suling = st.number_input("AHSP Suling-suling (Rp/Titik)", value=45000, key="5_ter_h_suling") if show_suling else 0
+        h_suling = st.number_input("AHSP Suling-suling (Rp/Titik)", value=45000.0, key="5_ter_h_suling") if show_suling else 0
         if show_suling: item_to_add.append(["Instalasi Pipa Suling PVC 2\" + Ijuk", ((sisi_miring * panjang * jml_tingkat)/2), "Titik", h_suling])
 
         fig, ax = plt.subplots(figsize=(6, 5))
@@ -515,57 +563,50 @@ elif jenis_bangunan == "5. Dinding Penahan Tanah (Stabilisasi Tebing)":
         t_bawah = st.number_input("Tebal Dinding Bawah (m)", value=0.5, key="5_c_tbwh")
         t_atas = st.number_input("Tebal Dinding Atas (m)", value=0.3, key="5_c_tats")
 
-        # Perhitungan Volume
         vol_dinding = ((t_atas + t_bawah) / 2) * h * panjang
         vol_base = l_base * t_base * panjang
         vol_beton = vol_dinding + vol_base
         vol_galian = l_base * (t_base + 1.0) * panjang 
         
-        # Luasan Bekisting (Sisi tegak + sisi miring + keliling base)
         sisi_miring = np.sqrt(h**2 + (t_bawah - t_atas)**2)
         luas_bekisting = (h + sisi_miring) * panjang + (t_base * 2 * panjang)
 
         st.markdown("**Pekerjaan & AHSP**")
         if mode_proyek != "Bangunan Baru":
             p_bongkar = st.slider("Persen Bongkaran (%)", 0, 100, 100, key="5_c_sl_bongk")
-            show_bongkar = st.checkbox("Bongkaran DPT Beton Lama", value=True, key="5_c_cb_bongk")
-            h_bongkar = st.number_input("AHSP Bongkaran (Rp/m³)", value=350000, key="5_c_h_bongk") if show_bongkar else 0
-            if show_bongkar: item_to_add.append([f"Bongkaran DPT Eksisting ({p_bongkar}%)", vol_beton * (p_bongkar/100), "m³", h_bongkar])
+            show_bongkar = st.checkbox("Pembongkaran Struktur Eksisting", value=True, key="5_c_cb_bongk")
+            h_bongkar = st.number_input("AHSP Bongkaran (Rp/m³)", value=380080.60, key="5_c_h_bongk") if show_bongkar else 0
+            if show_bongkar: item_to_add.append([f"Pembongkaran Struktur Eksisting ({p_bongkar}%)", vol_beton * (p_bongkar/100), "m³", h_bongkar])
 
-        show_galian = st.checkbox("Galian Struktur Tebing", value=True, key="5_c_cb_gal")
-        h_galian = st.number_input("AHSP Galian (Rp/m³)", value=75000, key="5_c_h_gal") if show_galian else 0
-        show_bekisting = st.checkbox("Bekisting DPT", value=True, key="5_c_cb_bek")
-        h_bekisting = st.number_input("AHSP Bekisting (Rp/m²)", value=145000, key="5_c_h_bek") if show_bekisting else 0
-        show_cor = st.checkbox("Pengecoran Beton DPT", value=True, key="5_c_cb_cor")
-        h_cor = st.number_input("AHSP Beton (Rp/m³)", value=4200000, key="5_c_h_cor") if show_cor else 0
-        show_besi = st.checkbox("Pembesian Struktur DPT", value=True, key="5_c_cb_besi")
-        r_besi = st.number_input("Rasio Besi (kg/m³)", value=125, key="5_c_r_besi") if show_besi else 0
-        h_besi = st.number_input("AHSP Besi (Rp/kg)", value=18500, key="5_c_h_besi") if show_besi else 0
-        show_timbunan = st.checkbox("Timbunan Tanah Kembali (Backfill)", value=True, key="5_c_cb_timb")
-        h_timbunan = st.number_input("AHSP Timbunan (Rp/m³)", value=115000, key="5_c_h_timb") if show_timbunan else 0
+        show_galian = st.checkbox("Pekerjaan Galian", value=True, key="5_c_cb_gal")
+        h_galian = st.number_input("AHSP Galian (Rp/m³)", value=174954.45, key="5_c_h_gal") if show_galian else 0
+        show_bekisting = st.checkbox("Pekerjaan Bekisting", value=True, key="5_c_cb_bek")
+        h_bekisting = st.number_input("AHSP Bekisting (Rp/m²)", value=316349.06, key="5_c_h_bek") if show_bekisting else 0
+        show_cor = st.checkbox("Beton", value=True, key="5_c_cb_cor")
+        h_cor = st.number_input("AHSP Beton (Rp/m³)", value=1723402.09, key="5_c_h_cor") if show_cor else 0
+        show_besi = st.checkbox("Tulangan Utama D16-200", value=True, key="5_c_cb_besi")
+        r_besi = st.number_input("Rasio Besi (kg/m³)", value=125.0, key="5_c_r_besi") if show_besi else 0
+        h_besi = st.number_input("AHSP Besi (Rp/kg)", value=23662.00, key="5_c_h_besi") if show_besi else 0
+        show_timbunan = st.checkbox("Pekerjaan Urugan Kembali (Backfill)", value=True, key="5_c_cb_timb")
+        h_timbunan = st.number_input("AHSP Urugan (Rp/m³)", value=94351.17, key="5_c_h_timb") if show_timbunan else 0
 
-        if show_galian: item_to_add.append(["Galian Struktur Tebing", vol_galian, "m³", h_galian])
-        if show_bekisting: item_to_add.append(["Bekisting DPT", luas_bekisting, "m²", h_bekisting])
-        if show_cor: item_to_add.append(["Pengecoran Beton DPT", vol_beton, "m³", h_cor])
-        if show_besi: item_to_add.append(["Pembesian Struktur DPT", vol_beton * r_besi, "kg", h_besi])
+        if show_galian: item_to_add.append(["Pekerjaan Galian Struktur Tebing", vol_galian, "m³", h_galian])
+        if show_bekisting: item_to_add.append(["Pekerjaan Bekisting DPT", luas_bekisting, "m²", h_bekisting])
+        if show_cor: item_to_add.append(["Beton DPT", vol_beton, "m³", h_cor])
+        if show_besi: item_to_add.append(["Tulangan Utama D16-200 Struktur DPT", vol_beton * r_besi, "kg", h_besi])
         
-        # Volume Timbunan menyesuaikan kemiringan dinding belakang
         l_heel = l_base - l_toe - t_bawah
         vol_timbunan = (l_heel * h * panjang) + (0.5 * (t_bawah - t_atas) * h * panjang)
 
-        if show_timbunan: item_to_add.append(["Timbunan Tanah Kembali (Backfill)", vol_timbunan, "m³", h_timbunan])
+        if show_timbunan: item_to_add.append(["Pekerjaan Urugan Kembali (Backfill)", vol_timbunan, "m³", h_timbunan])
 
         show_suling = st.checkbox("Pipa Suling-Suling PVC 2\" + Ijuk", value=True, key="5_c_cb_suling")
-        h_suling = st.number_input("AHSP Suling-suling (Rp/Titik)", value=45000, key="5_c_h_suling") if show_suling else 0
+        h_suling = st.number_input("AHSP Suling-suling (Rp/Titik)", value=45000.0, key="5_c_h_suling") if show_suling else 0
         if show_suling: item_to_add.append(["Instalasi Pipa Suling PVC 2\" + Ijuk", ((h*panjang)/2), "Titik", h_suling])
 
-        # Plotting
         fig, ax = plt.subplots(figsize=(6, 5))
         
-        # Visualisasi Base
         ax.add_patch(plt.Rectangle((0, -t_base), l_base, t_base, color='darkgray', ec='black'))
-        
-        # Visualisasi Dinding (Sisi depan vertikal, sisi tanah miring)
         pts_dinding = [
             [l_toe, 0], 
             [l_toe + t_bawah, 0], 
@@ -573,8 +614,6 @@ elif jenis_bangunan == "5. Dinding Penahan Tanah (Stabilisasi Tebing)":
             [l_toe, h]
         ]
         ax.add_patch(plt.Polygon(pts_dinding, color='darkgray', ec='black'))
-        
-        # Visualisasi Timbunan Tanah
         pts_timbunan = [
             [l_toe + t_bawah, 0],
             [l_base, 0],
@@ -583,7 +622,6 @@ elif jenis_bangunan == "5. Dinding Penahan Tanah (Stabilisasi Tebing)":
         ]
         ax.add_patch(plt.Polygon(pts_timbunan, color='saddlebrown', alpha=0.3, label='Timbunan Tebing'))
         
-        # Anotasi Dimensi
         ax.text(l_base/2, -t_base/2, f'{l_base}m', ha='center', va='center', fontsize=9, color='white')
         ax.text(l_toe + t_atas/2, h/2, f'{h}m', ha='center', va='center', fontsize=9, color='white', rotation=90)
         ax.text(l_toe + (t_bawah+t_atas)/2, h+0.2, f'{t_atas}m', ha='center', va='bottom', fontsize=9)
@@ -609,24 +647,24 @@ elif jenis_bangunan == "6. Pondasi Bore Pile":
     st.markdown("**Pekerjaan & AHSP**")
     if mode_proyek == "Rehabilitasi Struktur":
         p_bongkar = st.slider("Persen Titik Dibongkar (%)", 0, 100, 100, key="6_sl_bongk")
-        show_bongkar = st.checkbox("Pembersihan Lokasi/Bongkar Kepala", value=True, key="6_cb_bongk")
-        h_bongkar = st.number_input("AHSP Pembersihan (Rp/Titik)", value=500000, key="6_h_bongk") if show_bongkar else 0
-        if show_bongkar: item_to_add.append([f"Pembersihan Lokasi/Bongkar Kepala ({p_bongkar}%)", jml_titik * (p_bongkar/100), "Titik", h_bongkar])
+        show_bongkar = st.checkbox("Pembongkaran Struktur Eksisting", value=True, key="6_cb_bongk")
+        h_bongkar = st.number_input("AHSP Pembongkaran (Rp/Titik)", value=380080.60, key="6_h_bongk") if show_bongkar else 0
+        if show_bongkar: item_to_add.append([f"Pembongkaran Struktur Eksisting / Kepala ({p_bongkar}%)", jml_titik * (p_bongkar/100), "Titik", h_bongkar])
 
-    show_bor = st.checkbox("Pengeboran Bore Pile", value=True, key="6_cb_bor")
-    h_bor = st.number_input("AHSP Pengeboran (Rp/m³)", value=450000, key="6_h_bor") if show_bor else 0
+    show_bor = st.checkbox("Bore Pile", value=True, key="6_cb_bor")
+    h_bor = st.number_input("AHSP Pengeboran (Rp/m³)", value=935537.29, key="6_h_bor") if show_bor else 0
     show_casing = st.checkbox("Instalasi Temporary Casing", value=True, key="6_cb_cas")
-    h_casing = st.number_input("AHSP Casing (Rp/m')", value=150000, key="6_h_cas") if show_casing else 0
-    show_cor = st.checkbox("Pengecoran Beton K-350", value=True, key="6_cb_cor")
-    h_cor = st.number_input("AHSP Beton (Rp/m³)", value=1350000, key="6_h_cor") if show_cor else 0
-    show_besi = st.checkbox("Pembesian Tulangan", value=True, key="6_cb_besi")
-    r_besi = st.number_input("Rasio Besi (kg/m³)", value=180, key="6_r_besi") if show_besi else 0
-    h_besi = st.number_input("AHSP Besi (Rp/kg)", value=18500, key="6_h_besi") if show_besi else 0
+    h_casing = st.number_input("AHSP Casing (Rp/m')", value=150000.0, key="6_h_cas") if show_casing else 0
+    show_cor = st.checkbox("Beton", value=True, key="6_cb_cor")
+    h_cor = st.number_input("AHSP Beton (Rp/m³)", value=1723402.09, key="6_h_cor") if show_cor else 0
+    show_besi = st.checkbox("Tulangan Utama D16-200", value=True, key="6_cb_besi")
+    r_besi = st.number_input("Rasio Besi (kg/m³)", value=180.0, key="6_r_besi") if show_besi else 0
+    h_besi = st.number_input("AHSP Besi (Rp/kg)", value=23662.00, key="6_h_besi") if show_besi else 0
 
-    if show_bor: item_to_add.append(["Pengeboran Bore Pile", vol_pengeboran, "m³", h_bor])
+    if show_bor: item_to_add.append(["Bore Pile", vol_pengeboran, "m³", h_bor])
     if show_casing: item_to_add.append(["Instalasi Temporary Casing", diameter * 2 * jml_titik, "m'", h_casing])
-    if show_cor: item_to_add.append(["Pengecoran Beton K-350 (Bore Pile)", vol_total_beton, "m³", h_cor])
-    if show_besi: item_to_add.append(["Pembesian Tulangan Bore Pile", vol_total_beton * r_besi, "kg", h_besi])
+    if show_cor: item_to_add.append(["Beton (Bore Pile)", vol_total_beton, "m³", h_cor])
+    if show_besi: item_to_add.append(["Tulangan Utama D16-200 Bore Pile", vol_total_beton * r_besi, "kg", h_besi])
 
     fig, ax = plt.subplots(figsize=(5, 4))
     ax.add_patch(plt.Rectangle((-1, -kedalaman), 2, kedalaman, color='saddlebrown', alpha=0.1))
