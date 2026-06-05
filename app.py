@@ -4,10 +4,11 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import json
 
-# Konfigurasi Portrait untuk HP (Tema Elegan & Bersih)
+# =====================================================================
+# KONFIGURASI HALAMAN & CSS
+# =====================================================================
 st.set_page_config(page_title="KERAS - Estimator RAB", layout="centered")
 
-# CSS Kustom untuk menyembunyikan elemen bawaan Streamlit
 st.markdown("""
     <style>
         .block-container { padding-top: 1.5rem; padding-bottom: 2rem; }
@@ -41,7 +42,7 @@ if not st.session_state.logged_in:
     st.stop()
 
 # =====================================================================
-# INISIALISASI VARIABEL GLOBAL SETELAH LOGIN
+# INISIALISASI VARIABEL GLOBAL & HEADER
 # =====================================================================
 if 'rekap_proyek' not in st.session_state:
     st.session_state.rekap_proyek = []
@@ -70,7 +71,8 @@ jenis_bangunan = st.selectbox(
         "3. Jalan Perkerasan Kaku (Rigid)",
         "4. Pondasi Telapak",
         "5. Dinding Penahan Tanah (Stabilisasi Tebing)",
-        "6. Pondasi Bore Pile"
+        "6. Pondasi Bore Pile",
+        "7. Proteksi Lereng (Shotcrete & Soil Nailing)"
     ],
     key="navigasi_utama"
 )
@@ -131,7 +133,7 @@ if jenis_bangunan == "0. Pekerjaan Persiapan":
     ax.set_axis_off()
 
 # =====================================================================
-# LOGIKA 1. SALURAN AIR (TERINTEGRASI)
+# LOGIKA 1. SALURAN AIR
 # =====================================================================
 elif jenis_bangunan == "1. Saluran Air (Batu/Beton/Siklop)":
     st.markdown("**Material & Lokasi Perbaikan**")
@@ -226,7 +228,6 @@ elif jenis_bangunan == "1. Saluran Air (Batu/Beton/Siklop)":
     ax.add_patch(plt.Polygon(pts_lantai, color=col_lantai, ec='black', alpha=0.8))
 
     ax.text(0, tinggi/2, f'Ruang Air\nL:{l_atas}m', ha='center', va='center', color='blue', alpha=0.5)
-    
     ax.set_xlim(-l_atas/2 - max(t_atas, t_bawah) - 0.5, l_atas/2 + max(t_atas, t_bawah) + 0.5)
     ax.set_ylim(-t_dasar - 0.5, tinggi + 0.5)
     ax.set_aspect('equal')
@@ -370,7 +371,7 @@ elif jenis_bangunan == "4. Pondasi Telapak":
     ax.grid(True, linestyle='--', alpha=0.6)
 
 # =====================================================================
-# LOGIKA 5. DINDING PENAHAN TANAH (STABILISASI TEBING)
+# LOGIKA 5. DINDING PENAHAN TANAH
 # =====================================================================
 elif jenis_bangunan == "5. Dinding Penahan Tanah (Stabilisasi Tebing)":
     st.markdown("**Tipe Struktur & Dimensi**")
@@ -393,13 +394,10 @@ elif jenis_bangunan == "5. Dinding Penahan Tanah (Stabilisasi Tebing)":
         offset_depan = st.number_input("Kemiringan Sisi Depan (m)", value=0.3, help="Jarak horizontal kemiringan dari ujung bawah ke ujung atas sisi depan.", key="5_g_off")
         
         vol_material = ((l_atas + l_bawah) / 2) * h * panjang
-        
-        # Hitung sisi miring untuk kebutuhan luasan plesteran/bekisting
         sisi_miring_depan = np.sqrt(h**2 + offset_depan**2)
         offset_belakang = l_bawah - offset_depan - l_atas
         sisi_miring_belakang = np.sqrt(h**2 + offset_belakang**2)
         luas_sisi_luar = (sisi_miring_depan + sisi_miring_belakang) * panjang
-        
         vol_galian = l_bawah * h * panjang
         
         st.markdown("**Pekerjaan & AHSP**")
@@ -411,11 +409,8 @@ elif jenis_bangunan == "5. Dinding Penahan Tanah (Stabilisasi Tebing)":
 
         show_galian = st.checkbox("Pekerjaan Galian", value=True, key="5_g_cb_gal")
         h_galian = st.number_input("AHSP Galian (Rp/m³)", value=174954.45, key="5_g_h_gal") if show_galian else 0
-        
         show_timbunan = st.checkbox("Pekerjaan Urugan Kembali (Backfill)", value=True, key="5_g_cb_timb")
         h_timbunan = st.number_input("AHSP Urugan (Rp/m³)", value=94351.17, key="5_g_h_timb") if show_timbunan else 0
-        
-        # Volume timbunan wedge di sisi belakang dinding
         vol_timbunan = (0.5 * offset_belakang * h * panjang) if offset_belakang > 0 else 0
         
         if not is_siklop:
@@ -443,29 +438,17 @@ elif jenis_bangunan == "5. Dinding Penahan Tanah (Stabilisasi Tebing)":
         h_suling = st.number_input("AHSP Suling-suling (Rp/Titik)", value=45000.0, key="5_g_h_suling") if show_suling else 0
         if show_suling: item_to_add.append(["Instalasi Pipa Suling PVC 2\" + Ijuk", (luas_sisi_luar/2), "Titik", h_suling])
 
-        # Visualisasi
         fig, ax = plt.subplots(figsize=(6, 5))
-        pts_dinding = [
-            [0, 0], 
-            [l_bawah, 0], 
-            [offset_depan + l_atas, h], 
-            [offset_depan, h]
-        ]
+        pts_dinding = [[0, 0], [l_bawah, 0], [offset_depan + l_atas, h], [offset_depan, h]]
         ax.add_patch(plt.Polygon(pts_dinding, color='#8b9ea8' if is_siklop else 'slategray', ec='black', alpha=0.9))
         
         lebar_timbunan = max(1.0, offset_belakang + 0.5)
-        pts_timbunan = [
-            [l_bawah, 0],
-            [l_bawah + lebar_timbunan, 0],
-            [l_bawah + lebar_timbunan, h],
-            [offset_depan + l_atas, h]
-        ]
+        pts_timbunan = [[l_bawah, 0], [l_bawah + lebar_timbunan, 0], [l_bawah + lebar_timbunan, h], [offset_depan + l_atas, h]]
         ax.add_patch(plt.Polygon(pts_timbunan, color='saddlebrown', alpha=0.3, label='Timbunan Tebing'))
         ax.plot([-0.5, l_bawah + lebar_timbunan], [0, 0], color='saddlebrown', lw=3)
         
         ax.text(l_bawah/2, 0.2, f'{l_bawah}m', ha='center', va='bottom', fontsize=9, color='white')
         ax.text(offset_depan + l_atas/2, h - 0.3, f'{l_atas}m', ha='center', va='top', fontsize=9, color='white')
-        
         ax.set_xlim(-1.0, l_bawah + lebar_timbunan + 0.5); ax.set_ylim(-0.5, h+1.0); ax.set_aspect('equal')
         ax.set_xlabel("Lebar Struktur (m)"); ax.set_ylabel("Tinggi/Elevasi (m)")
         ax.grid(True, linestyle='--', alpha=0.6); ax.legend(loc='upper right')
@@ -549,27 +532,42 @@ elif jenis_bangunan == "5. Dinding Penahan Tanah (Stabilisasi Tebing)":
         ax.add_patch(plt.Polygon(soil_pts, color='saddlebrown', alpha=0.2))
         x_s, y_s = zip(*soil_pts[:-2])
         ax.plot(x_s, y_s, color='saddlebrown', lw=3, label='Tanah / Tebing')
-
         ax.set_xlim(min_x - 1.5, max_x + 1.5); ax.set_ylim(-1, y_bottom + 1.5); ax.set_aspect('equal')
         ax.set_xlabel("Jarak Horizontal (m)"); ax.set_ylabel("Tinggi Elevasi (m)")
         ax.grid(True, linestyle='--', alpha=0.6); ax.legend(loc='upper left')
 
     else: # Beton Bertulang (Cantilever)
-        st.markdown("**Dimensi Dinding Cantilever**")
-        h = st.number_input("Tinggi Dinding (m)", value=4.0, key="5_c_h")
-        l_base = st.number_input("Lebar Total Base/Lantai (m)", value=2.5, key="5_c_lb")
-        t_base = st.number_input("Tebal Base/Lantai (m)", value=0.4, key="5_c_tb")
+        st.markdown("**Dimensi Dinding Cantilever & Tapak**")
+        h = st.number_input("Tinggi Dinding (Stem) (m)", value=4.0, key="5_c_h")
+        l_base = st.number_input("Lebar Total Base/Tapak (m)", value=2.5, key="5_c_lb")
+        t_base = st.number_input("Tebal Base/Tapak (m)", value=0.4, key="5_c_tb")
         l_toe = st.number_input("Jarak Ujung Depan ke Dinding (Toe) (m)", value=0.5, key="5_c_ltoe")
         t_bawah = st.number_input("Tebal Dinding Bawah (m)", value=0.5, key="5_c_tbwh")
         t_atas = st.number_input("Tebal Dinding Atas (m)", value=0.3, key="5_c_tats")
 
+        use_counterfort = st.checkbox("Gunakan Sirip Penahan (Counterfort)", value=False, key="5_c_cf")
+        vol_sirip_total = 0
+        luas_bekisting_sirip = 0
+        l_heel = l_base - l_toe - t_bawah
+
+        if use_counterfort:
+            col_cf1, col_cf2 = st.columns(2)
+            t_sirip = col_cf1.number_input("Tebal Sirip (m)", value=0.3, key="5_c_tsirip")
+            jarak_sirip = col_cf2.number_input("Jarak Antar Sirip (m)", value=2.5, key="5_c_jsirip")
+            n_sirip = int(panjang / jarak_sirip) + 1
+            vol_sirip_total = 0.5 * l_heel * h * t_sirip * n_sirip
+            sisi_miring_sirip = np.sqrt(l_heel**2 + h**2)
+            luas_bekisting_sirip = ((0.5 * l_heel * h * 2) + (sisi_miring_sirip * t_sirip)) * n_sirip
+
         vol_dinding = ((t_atas + t_bawah) / 2) * h * panjang
         vol_base = l_base * t_base * panjang
-        vol_beton = vol_dinding + vol_base
-        vol_galian = l_base * (t_base + 1.0) * panjang 
+        vol_beton = vol_dinding + vol_base + vol_sirip_total
         
-        sisi_miring = np.sqrt(h**2 + (t_bawah - t_atas)**2)
-        luas_bekisting = (h + sisi_miring) * panjang + (t_base * 2 * panjang)
+        h_galian_input = st.number_input("Kedalaman Galian (m)", value=t_base + 0.5, key="5_c_hgal_in")
+        vol_galian = (l_base + 1.0) * h_galian_input * panjang 
+        
+        sisi_miring_dinding = np.sqrt(h**2 + (t_bawah - t_atas)**2)
+        luas_bekisting = (h + sisi_miring_dinding) * panjang + (t_base * 2 * panjang) + luas_bekisting_sirip
 
         st.markdown("**Pekerjaan & AHSP**")
         if mode_proyek != "Bangunan Baru":
@@ -578,56 +576,53 @@ elif jenis_bangunan == "5. Dinding Penahan Tanah (Stabilisasi Tebing)":
             h_bongkar = st.number_input("AHSP Bongkaran (Rp/m³)", value=380080.60, key="5_c_h_bongk") if show_bongkar else 0
             if show_bongkar: item_to_add.append([f"Pembongkaran Struktur Eksisting ({p_bongkar}%)", vol_beton * (p_bongkar/100), "m³", h_bongkar])
 
-        show_galian = st.checkbox("Pekerjaan Galian", value=True, key="5_c_cb_gal")
+        show_galian = st.checkbox("Pekerjaan Galian (Termasuk Working Space 1m)", value=True, key="5_c_cb_gal")
         h_galian = st.number_input("AHSP Galian (Rp/m³)", value=174954.45, key="5_c_h_gal") if show_galian else 0
         show_bekisting = st.checkbox("Pekerjaan Bekisting", value=True, key="5_c_cb_bek")
         h_bekisting = st.number_input("AHSP Bekisting (Rp/m²)", value=316349.06, key="5_c_h_bek") if show_bekisting else 0
         show_cor = st.checkbox("Beton", value=True, key="5_c_cb_cor")
         h_cor = st.number_input("AHSP Beton (Rp/m³)", value=1723402.09, key="5_c_h_cor") if show_cor else 0
-        show_besi = st.checkbox("Tulangan Utama D16-200", value=True, key="5_c_cb_besi")
-        r_besi = st.number_input("Rasio Besi (kg/m³)", value=125.0, key="5_c_r_besi") if show_besi else 0
+        show_besi = st.checkbox("Tulangan Utama", value=True, key="5_c_cb_besi")
+        r_besi = st.number_input("Rasio Besi (kg/m³)", value=150.0 if use_counterfort else 125.0, key="5_c_r_besi") if show_besi else 0
         h_besi = st.number_input("AHSP Besi (Rp/kg)", value=23662.00, key="5_c_h_besi") if show_besi else 0
-        show_timbunan = st.checkbox("Pekerjaan Urugan Kembali (Backfill)", value=True, key="5_c_cb_timb")
-        h_timbunan = st.number_input("AHSP Urugan (Rp/m³)", value=94351.17, key="5_c_h_timb") if show_timbunan else 0
+        
+        st.markdown("**Material Timbunan**")
+        jenis_timbunan = st.radio("Pilih Jenis Timbunan:", ["Tanah Kembali", "Sirtu / Material Pilihan"], horizontal=True, key="5_c_jtimb")
+        show_timbunan = st.checkbox(f"Pekerjaan Urugan ({jenis_timbunan})", value=True, key="5_c_cb_timb")
+        h_timbunan = st.number_input("AHSP Urugan (Rp/m³)", value=94351.17 if jenis_timbunan == "Tanah Kembali" else 215000.0, key="5_c_h_timb") if show_timbunan else 0
 
         if show_galian: item_to_add.append(["Pekerjaan Galian Struktur Tebing", vol_galian, "m³", h_galian])
         if show_bekisting: item_to_add.append(["Pekerjaan Bekisting DPT", luas_bekisting, "m²", h_bekisting])
-        if show_cor: item_to_add.append(["Beton DPT", vol_beton, "m³", h_cor])
-        if show_besi: item_to_add.append(["Tulangan Utama D16-200 Struktur DPT", vol_beton * r_besi, "kg", h_besi])
+        if show_cor: item_to_add.append([f"Beton DPT {'& Counterfort' if use_counterfort else ''}", vol_beton, "m³", h_cor])
+        if show_besi: item_to_add.append(["Tulangan Utama Struktur DPT", vol_beton * r_besi, "kg", h_besi])
         
-        l_heel = l_base - l_toe - t_bawah
-        vol_timbunan = (l_heel * h * panjang) + (0.5 * (t_bawah - t_atas) * h * panjang)
+        vol_ruang_timbunan = (l_heel * h * panjang) + (0.5 * (t_bawah - t_atas) * h * panjang)
+        vol_timbunan_netto = max(0, vol_ruang_timbunan - vol_sirip_total)
 
-        if show_timbunan: item_to_add.append(["Pekerjaan Urugan Kembali (Backfill)", vol_timbunan, "m³", h_timbunan])
+        if show_timbunan: item_to_add.append([f"Pekerjaan Urugan {jenis_timbunan}", vol_timbunan_netto, "m³", h_timbunan])
 
         show_suling = st.checkbox("Pipa Suling-Suling PVC 2\" + Ijuk", value=True, key="5_c_cb_suling")
         h_suling = st.number_input("AHSP Suling-suling (Rp/Titik)", value=45000.0, key="5_c_h_suling") if show_suling else 0
         if show_suling: item_to_add.append(["Instalasi Pipa Suling PVC 2\" + Ijuk", ((h*panjang)/2), "Titik", h_suling])
 
         fig, ax = plt.subplots(figsize=(6, 5))
-        
         ax.add_patch(plt.Rectangle((0, -t_base), l_base, t_base, color='darkgray', ec='black'))
-        pts_dinding = [
-            [l_toe, 0], 
-            [l_toe + t_bawah, 0], 
-            [l_toe + t_atas, h], 
-            [l_toe, h]
-        ]
+        pts_dinding = [[l_toe, 0], [l_toe + t_bawah, 0], [l_toe + t_atas, h], [l_toe, h]]
         ax.add_patch(plt.Polygon(pts_dinding, color='darkgray', ec='black'))
-        pts_timbunan = [
-            [l_toe + t_bawah, 0],
-            [l_base, 0],
-            [l_base, h],
-            [l_toe + t_atas, h]
-        ]
-        ax.add_patch(plt.Polygon(pts_timbunan, color='saddlebrown', alpha=0.3, label='Timbunan Tebing'))
+        
+        if use_counterfort:
+            pts_sirip = [[l_toe + t_bawah, 0], [l_base, 0], [l_toe + t_atas, h]]
+            ax.add_patch(plt.Polygon(pts_sirip, color='gray', ec='black', alpha=0.5, label='Sirip Counterfort'))
+        
+        pts_timbunan = [[l_toe + t_bawah, 0], [l_base, 0], [l_base, h], [l_toe + t_atas, h]]
+        ax.add_patch(plt.Polygon(pts_timbunan, color='saddlebrown', alpha=0.3, hatch='//' if jenis_timbunan != "Tanah Kembali" else '', label=f'Timbunan ({jenis_timbunan.split(" ")[0]})'))
         
         ax.text(l_base/2, -t_base/2, f'{l_base}m', ha='center', va='center', fontsize=9, color='white')
         ax.text(l_toe + t_atas/2, h/2, f'{h}m', ha='center', va='center', fontsize=9, color='white', rotation=90)
         ax.text(l_toe + (t_bawah+t_atas)/2, h+0.2, f'{t_atas}m', ha='center', va='bottom', fontsize=9)
         ax.text(l_toe + t_bawah/2, 0.2, f'{t_bawah}m', ha='center', va='bottom', fontsize=9)
         
-        ax.set_xlim(-0.5, l_base+0.5); ax.set_ylim(-t_base-0.5, h+1); ax.set_aspect('equal')
+        ax.set_xlim(-1.0, l_base+1.0); ax.set_ylim(-t_base-1.0, h+1); ax.set_aspect('equal')
         ax.set_xlabel("Lebar Struktur (m)"); ax.set_ylabel("Tinggi/Elevasi (m)")
         ax.grid(True, linestyle='--', alpha=0.6); ax.legend(loc='upper right')
 
@@ -657,14 +652,14 @@ elif jenis_bangunan == "6. Pondasi Bore Pile":
     h_casing = st.number_input("AHSP Casing (Rp/m')", value=150000.0, key="6_h_cas") if show_casing else 0
     show_cor = st.checkbox("Beton", value=True, key="6_cb_cor")
     h_cor = st.number_input("AHSP Beton (Rp/m³)", value=1723402.09, key="6_h_cor") if show_cor else 0
-    show_besi = st.checkbox("Tulangan Utama D16-200", value=True, key="6_cb_besi")
+    show_besi = st.checkbox("Tulangan Utama", value=True, key="6_cb_besi")
     r_besi = st.number_input("Rasio Besi (kg/m³)", value=180.0, key="6_r_besi") if show_besi else 0
     h_besi = st.number_input("AHSP Besi (Rp/kg)", value=23662.00, key="6_h_besi") if show_besi else 0
 
     if show_bor: item_to_add.append(["Bore Pile", vol_pengeboran, "m³", h_bor])
     if show_casing: item_to_add.append(["Instalasi Temporary Casing", diameter * 2 * jml_titik, "m'", h_casing])
     if show_cor: item_to_add.append(["Beton (Bore Pile)", vol_total_beton, "m³", h_cor])
-    if show_besi: item_to_add.append(["Tulangan Utama D16-200 Bore Pile", vol_total_beton * r_besi, "kg", h_besi])
+    if show_besi: item_to_add.append(["Tulangan Utama Bore Pile", vol_total_beton * r_besi, "kg", h_besi])
 
     fig, ax = plt.subplots(figsize=(5, 4))
     ax.add_patch(plt.Rectangle((-1, -kedalaman), 2, kedalaman, color='saddlebrown', alpha=0.1))
@@ -672,6 +667,88 @@ elif jenis_bangunan == "6. Pondasi Bore Pile":
     ax.set_xlim(-1, 1); ax.set_ylim(-kedalaman-1, 1); ax.set_aspect('equal')
     ax.set_xlabel("Lebar Galian/Diameter (m)"); ax.set_ylabel("Kedalaman (m)")
     ax.grid(True, linestyle='--', alpha=0.6)
+
+# =====================================================================
+# LOGIKA 7. PROTEKSI LERENG (SHOTCRETE & SOIL NAILING)
+# =====================================================================
+elif jenis_bangunan == "7. Proteksi Lereng (Shotcrete & Soil Nailing)":
+    st.markdown("**Dimensi Lereng/Tebing**")
+    col_l1, col_l2 = st.columns(2)
+    panjang = col_l1.number_input("Panjang Memanjang Lereng (m)", value=50.0, key="7_p")
+    tinggi_miring = col_l2.number_input("Panjang Miring Lereng (m)", value=15.0, help="Jarak dari kaki lereng ke puncak secara miring", key="7_tm")
+    luas_lereng = panjang * tinggi_miring
+    
+    st.info(f"**Total Luas Permukaan Lereng:** {luas_lereng:,.2f} m²")
+
+    st.markdown("**Spesifikasi Shotcrete**")
+    t_shotcrete = st.number_input("Tebal Shotcrete (m)", value=0.15, key="7_ts")
+    lapis_wiremesh = st.number_input("Jumlah Lapis Wiremesh M10", value=1, step=1, key="7_wm")
+    
+    st.markdown("**Spesifikasi Soil Nailing**")
+    pakai_nailing = st.checkbox("Gunakan Soil Nailing?", value=True, key="7_cb_nail")
+    
+    if pakai_nailing:
+        col_n1, col_n2 = st.columns(2)
+        jarak_h = col_n1.number_input("Jarak Horizontal (m)", value=1.5, key="7_jh")
+        jarak_v = col_n2.number_input("Jarak Vertikal (m)", value=1.5, key="7_jv")
+        panjang_nail = st.number_input("Kedalaman Masuk Tanah (L) (m)", value=6.0, key="7_pn")
+        
+        jml_nailing = np.ceil(luas_lereng / (jarak_h * jarak_v))
+        st.caption(f"*Estimasi kebutuhan: {int(jml_nailing)} Titik Soil Nailing*")
+    else:
+        jml_nailing = 0
+        panjang_nail = 0
+
+    st.markdown("**Pekerjaan & AHSP**")
+    show_perapihan = st.checkbox("Pekerjaan Kupas/Perapihan Permukaan Lereng", value=True, key="7_cb_kupas")
+    h_perapihan = st.number_input("AHSP Perapihan Lereng (Rp/m²)", value=25000.0, key="7_h_kupas") if show_perapihan else 0
+
+    show_shotcrete = st.checkbox("Pekerjaan Shotcrete K-300 / K-350", value=True, key="7_cb_shot")
+    h_shotcrete = st.number_input("AHSP Shotcrete (Rp/m³)", value=2850000.0, key="7_h_shot") if show_shotcrete else 0
+    
+    show_wiremesh = st.checkbox(f"Pemasangan Wiremesh M10 ({lapis_wiremesh} Lapis)", value=True, key="7_cb_wm")
+    h_wiremesh = st.number_input("AHSP Wiremesh (Rp/m²)", value=115000.0, key="7_h_wm") if show_wiremesh else 0
+
+    if pakai_nailing:
+        show_nailing = st.checkbox("Pekerjaan Soil Nailing D25 Terpasang", value=True, key="7_cb_do_nail")
+        h_nailing = st.number_input("AHSP Soil Nailing (Rp/Titik)", value=1250000.0, help="Harga per titik mencakup Pengeboran, Besi D25, Grouting Epoxy/Semen, Bearing Plate, & Mur.", key="7_h_nail") if show_nailing else 0
+
+    if show_perapihan: item_to_add.append(["Perapihan & Pembersihan Permukaan Lereng", luas_lereng, "m²", h_perapihan])
+    if show_shotcrete: item_to_add.append(["Pekerjaan Shotcrete Beton", luas_lereng * t_shotcrete, "m³", h_shotcrete])
+    if show_wiremesh: item_to_add.append([f"Pemasangan Wiremesh M10 ({lapis_wiremesh} Lapis + Overlap)", luas_lereng * lapis_wiremesh * 1.1, "m²", h_wiremesh]) 
+    if pakai_nailing and show_nailing:
+        item_to_add.append([f"Soil Nailing D25 (Kedalaman {panjang_nail}m)", jml_nailing, "Titik", h_nailing])
+
+    fig, ax = plt.subplots(figsize=(6, 5))
+    sudut = np.radians(60)
+    h_visual = tinggi_miring * np.sin(sudut)
+    w_visual = tinggi_miring * np.cos(sudut)
+    
+    ax.add_patch(plt.Polygon([[0, h_visual], [w_visual, 0], [w_visual + 10, 0], [w_visual + 10, h_visual + 10], [0, h_visual + 10]], color='saddlebrown', alpha=0.3, label="Tanah/Tebing Asli"))
+    
+    dx = t_shotcrete * np.sin(sudut)
+    dy = t_shotcrete * np.cos(sudut)
+    pts_shot = [[0, h_visual], [w_visual, 0], [w_visual - dx, -dy], [-dx, h_visual - dy]]
+    ax.add_patch(plt.Polygon(pts_shot, color='gray', label=f'Shotcrete {t_shotcrete*100:.0f}cm'))
+    
+    if pakai_nailing:
+        jarak_visual_v = tinggi_miring / 5
+        for i in range(1, 5):
+            L_tempuh = i * jarak_visual_v
+            x_surf = L_tempuh * np.cos(sudut)
+            y_surf = h_visual - (L_tempuh * np.sin(sudut))
+            x_dalam = x_surf + (panjang_nail * np.sin(sudut))
+            y_dalam = y_surf + (panjang_nail * np.cos(sudut))
+            ax.plot([x_surf, x_dalam], [y_surf, y_dalam], color='black', lw=3)
+            ax.plot([x_surf, x_dalam], [y_surf, y_dalam], color='red', lw=1.5, linestyle='--')
+            ax.scatter([x_surf], [y_surf], color='blue', s=80, zorder=5)
+            
+        ax.plot([], [], color='red', linestyle='--', label=f'Soil Nail D25 (L={panjang_nail}m)')
+        ax.scatter([], [], color='blue', label='Bearing Plate')
+
+    ax.set_xlim(-2, w_visual + panjang_nail + 2); ax.set_ylim(-2, h_visual + panjang_nail); ax.set_aspect('equal')
+    ax.set_title("Visualisasi Penampang Proteksi Lereng")
+    ax.grid(True, linestyle='--', alpha=0.6); ax.legend(loc='lower right')
 
 # =====================================================================
 # BLOK 2: REVIEW ESTIMASI SEMENTARA
@@ -700,7 +777,10 @@ if len(item_to_add) > 0:
         st.success("Data berhasil ditambahkan ke tabel RAB di bawah.")
 
 st.markdown("---")
-st.pyplot(fig)
+if jenis_bangunan != "0. Pekerjaan Persiapan":
+    st.pyplot(fig)
+else:
+    st.pyplot(fig)
 
 
 # =====================================================================
