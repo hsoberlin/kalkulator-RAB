@@ -589,7 +589,7 @@ elif jenis_bangunan == "5. Dinding Penahan Tanah (Stabilisasi Tebing)":
         st.markdown("**Material Timbunan**")
         jenis_timbunan = st.radio("Pilih Jenis Timbunan:", ["Tanah Kembali", "Sirtu / Material Pilihan"], horizontal=True, key="5_c_jtimb")
         show_timbunan = st.checkbox(f"Pekerjaan Urugan ({jenis_timbunan})", value=True, key="5_c_cb_timb")
-        h_timbunan = st.number_input("AHSP Urugan (Rp/m³)", value=94351.17 if jenis_timbunan == "Tanah Kembali" else 215000.0, key="5_c_h_timb") if show_timbunan else 0
+        h_timbunan = st.number_input("AHSP Urugan (Rp/m³)", value=94351.17 if jenis_timbunan == "Tanah Kembali" else 527814.0, key="5_c_h_timb") if show_timbunan else 0
 
         if show_galian: item_to_add.append(["Pekerjaan Galian Struktur Tebing", vol_galian, "m³", h_galian])
         if show_bekisting: item_to_add.append(["Pekerjaan Bekisting DPT", luas_bekisting, "m²", h_bekisting])
@@ -680,8 +680,11 @@ elif jenis_bangunan == "7. Proteksi Lereng (Shotcrete & Soil Nailing)":
     
     st.info(f"**Total Luas Permukaan Lereng:** {luas_lereng:,.2f} m²")
 
-    st.markdown("**Spesifikasi Shotcrete**")
-    t_shotcrete = st.number_input("Tebal Shotcrete (m)", value=0.15, key="7_ts")
+    st.markdown("**Spesifikasi Shotcrete / Facing Beton**")
+    col_s1, col_s2 = st.columns(2)
+    t_bawah_shot = col_s1.number_input("Tebal Facing Bawah (m)", value=0.20, key="7_tbwh")
+    t_atas_shot = col_s2.number_input("Tebal Facing Atas (m)", value=0.10, help="Jika 0, penampang menjadi segitiga.", key="7_tats")
+    t_rata_rata = (t_bawah_shot + t_atas_shot) / 2
     lapis_wiremesh = st.number_input("Jumlah Lapis Wiremesh M10", value=1, step=1, key="7_wm")
     
     st.markdown("**Spesifikasi Soil Nailing**")
@@ -703,7 +706,7 @@ elif jenis_bangunan == "7. Proteksi Lereng (Shotcrete & Soil Nailing)":
     show_perapihan = st.checkbox("Pekerjaan Kupas/Perapihan Permukaan Lereng", value=True, key="7_cb_kupas")
     h_perapihan = st.number_input("AHSP Perapihan Lereng (Rp/m²)", value=25000.0, key="7_h_kupas") if show_perapihan else 0
 
-    show_shotcrete = st.checkbox("Pekerjaan Shotcrete K-300 / K-350", value=True, key="7_cb_shot")
+    show_shotcrete = st.checkbox("Pekerjaan Shotcrete / Pengecoran Facing K-300", value=True, key="7_cb_shot")
     h_shotcrete = st.number_input("AHSP Shotcrete (Rp/m³)", value=2850000.0, key="7_h_shot") if show_shotcrete else 0
     
     show_wiremesh = st.checkbox(f"Pemasangan Wiremesh M10 ({lapis_wiremesh} Lapis)", value=True, key="7_cb_wm")
@@ -714,7 +717,7 @@ elif jenis_bangunan == "7. Proteksi Lereng (Shotcrete & Soil Nailing)":
         h_nailing = st.number_input("AHSP Soil Nailing (Rp/Titik)", value=1250000.0, help="Harga per titik mencakup Pengeboran, Besi D25, Grouting Epoxy/Semen, Bearing Plate, & Mur.", key="7_h_nail") if show_nailing else 0
 
     if show_perapihan: item_to_add.append(["Perapihan & Pembersihan Permukaan Lereng", luas_lereng, "m²", h_perapihan])
-    if show_shotcrete: item_to_add.append(["Pekerjaan Shotcrete Beton", luas_lereng * t_shotcrete, "m³", h_shotcrete])
+    if show_shotcrete: item_to_add.append(["Pekerjaan Shotcrete / Facing Beton", luas_lereng * t_rata_rata, "m³", h_shotcrete])
     if show_wiremesh: item_to_add.append([f"Pemasangan Wiremesh M10 ({lapis_wiremesh} Lapis + Overlap)", luas_lereng * lapis_wiremesh * 1.1, "m²", h_wiremesh]) 
     if pakai_nailing and show_nailing:
         item_to_add.append([f"Soil Nailing D25 (Kedalaman {panjang_nail}m)", jml_nailing, "Titik", h_nailing])
@@ -724,12 +727,22 @@ elif jenis_bangunan == "7. Proteksi Lereng (Shotcrete & Soil Nailing)":
     h_visual = tinggi_miring * np.sin(sudut)
     w_visual = tinggi_miring * np.cos(sudut)
     
+    # Polygon Tanah
     ax.add_patch(plt.Polygon([[0, h_visual], [w_visual, 0], [w_visual + 10, 0], [w_visual + 10, h_visual + 10], [0, h_visual + 10]], color='saddlebrown', alpha=0.3, label="Tanah/Tebing Asli"))
     
-    dx = t_shotcrete * np.sin(sudut)
-    dy = t_shotcrete * np.cos(sudut)
-    pts_shot = [[0, h_visual], [w_visual, 0], [w_visual - dx, -dy], [-dx, h_visual - dy]]
-    ax.add_patch(plt.Polygon(pts_shot, color='gray', label=f'Shotcrete {t_shotcrete*100:.0f}cm'))
+    # Menghitung koordinat ketebalan facing secara tegak lurus dari lereng
+    dx_atas = t_atas_shot * np.sin(sudut)
+    dy_atas = t_atas_shot * np.cos(sudut)
+    dx_bawah = t_bawah_shot * np.sin(sudut)
+    dy_bawah = t_bawah_shot * np.cos(sudut)
+    
+    pts_shot = [
+        [0, h_visual], 
+        [w_visual, 0], 
+        [w_visual - dx_bawah, -dy_bawah], 
+        [-dx_atas, h_visual - dy_atas]
+    ]
+    ax.add_patch(plt.Polygon(pts_shot, color='gray', label=f'Facing (B:{t_bawah_shot}m, A:{t_atas_shot}m)'))
     
     if pakai_nailing:
         jarak_visual_v = tinggi_miring / 5
@@ -741,12 +754,14 @@ elif jenis_bangunan == "7. Proteksi Lereng (Shotcrete & Soil Nailing)":
             y_dalam = y_surf + (panjang_nail * np.cos(sudut))
             ax.plot([x_surf, x_dalam], [y_surf, y_dalam], color='black', lw=3)
             ax.plot([x_surf, x_dalam], [y_surf, y_dalam], color='red', lw=1.5, linestyle='--')
-            ax.scatter([x_surf], [y_surf], color='blue', s=80, zorder=5)
+            ax.scatter([x_surf - (dx_atas+dx_bawah)/4], [y_surf - (dy_atas+dy_bawah)/4], color='blue', s=80, zorder=5) # Visual plat menempel di beton
             
         ax.plot([], [], color='red', linestyle='--', label=f'Soil Nail D25 (L={panjang_nail}m)')
         ax.scatter([], [], color='blue', label='Bearing Plate')
 
-    ax.set_xlim(-2, w_visual + panjang_nail + 2); ax.set_ylim(-2, h_visual + panjang_nail); ax.set_aspect('equal')
+    ax.set_xlim(-max(2.0, t_atas_shot + 1), w_visual + panjang_nail + 2)
+    ax.set_ylim(-max(2.0, t_bawah_shot + 1), h_visual + panjang_nail)
+    ax.set_aspect('equal')
     ax.set_title("Visualisasi Penampang Proteksi Lereng")
     ax.grid(True, linestyle='--', alpha=0.6); ax.legend(loc='lower right')
 
