@@ -132,7 +132,7 @@ if jenis_bangunan == "0. Pekerjaan Persiapan":
     ax.set_axis_off()
 
 # =====================================================================
-# LOGIKA 1. SALURAN AIR (TERINTEGRASI)
+# LOGIKA 1. SALURAN AIR
 # =====================================================================
 elif jenis_bangunan == "1. Saluran Air (Batu/Beton/Siklop)":
     st.markdown("**Material & Lokasi Perbaikan**")
@@ -571,7 +571,7 @@ elif jenis_bangunan == "5. Dinding Penahan Tanah (Stabilisasi Tebing)":
 
         if use_counterfort:
             col_cf1, col_cf2, col_cf3 = st.columns(3)
-            t_bawah_sirip = col_cf1.number_input("Lebar Bawah Sirip (m)", value=l_heel, key="5_c_tsb")
+            t_bawah_sirip = col_cf1.number_input("Lebar Bawah Sirip (m)", value=float(l_heel), key="5_c_tsb")
             t_atas_sirip = col_cf2.number_input("Lebar Atas Sirip (m)", value=0.0, help="Isi 0 untuk bentuk Segitiga", key="5_c_tsa")
             t_tebal_sirip = col_cf3.number_input("Tebal Sirip (m)", value=0.3, key="5_c_tsirip")
             jarak_sirip = st.number_input("Jarak Antar Sirip (m)", value=2.5, key="5_c_jsirip")
@@ -612,7 +612,12 @@ elif jenis_bangunan == "5. Dinding Penahan Tanah (Stabilisasi Tebing)":
         st.markdown("**Material Timbunan**")
         jenis_timbunan = st.radio("Pilih Jenis Timbunan:", ["Tanah Kembali", "Sirtu / Material Pilihan"], horizontal=True, key="5_c_jtimb")
         show_timbunan = st.checkbox(f"Pekerjaan Urugan ({jenis_timbunan})", value=True, key="5_c_cb_timb")
-        h_timbunan = st.number_input("AHSP Urugan (Rp/m³)", value=94351.17 if jenis_timbunan == "Tanah Kembali" else 527814.0, key="5_c_h_timb") if show_timbunan else 0
+        
+        # PERBAIKAN: Pemisahan key number_input agar harga berubah secara real-time menyesuaikan state radio button
+        if jenis_timbunan == "Tanah Kembali":
+            h_timbunan = st.number_input("AHSP Urugan Tanah (Rp/m³)", value=94351.17, key="5_c_h_timb_tanah") if show_timbunan else 0
+        else:
+            h_timbunan = st.number_input("AHSP Urugan Sirtu (Rp/m³)", value=527814.19, key="5_c_h_timb_sirtu") if show_timbunan else 0
 
         if show_galian: item_to_add.append(["Pekerjaan Galian Struktur Tebing", vol_galian, "m³", h_galian])
         if show_bekisting: item_to_add.append(["Pekerjaan Bekisting DPT", luas_bekisting, "m²", h_bekisting])
@@ -829,7 +834,10 @@ if len(item_to_add) > 0:
         st.success("Data berhasil ditambahkan ke tabel RAB di bawah.")
 
 st.markdown("---")
-st.pyplot(fig)
+if jenis_bangunan != "0. Pekerjaan Persiapan":
+    st.pyplot(fig)
+else:
+    st.pyplot(fig)
 
 
 # =====================================================================
