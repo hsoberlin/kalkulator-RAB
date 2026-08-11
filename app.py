@@ -16,6 +16,7 @@ Perubahan utama dari v1:
 """
 
 import io
+import sys
 import json
 import inspect
 import datetime
@@ -1661,6 +1662,20 @@ if st.session_state.rekap_proyek:
 
     # ---------------- Export ----------------
     st.markdown("#### 📤 Export Dokumen")
+
+    with st.expander("🔧 Diagnostik Paket Export"):
+        st.code(sys.executable, language=None)
+        st.caption("Interpreter Python yang sedang menjalankan aplikasi ini.")
+        for nama in ["openpyxl", "reportlab"]:
+            try:
+                __import__(nama)
+                st.success(f"✅ {nama} terpasang")
+            except ImportError:
+                st.error(f"❌ {nama} TIDAK terpasang")
+        st.caption("Jalankan perintah berikut di terminal (salin persis):")
+        st.code(f'"{sys.executable}" -m pip install openpyxl reportlab', language="bash")
+        st.caption("Jika aplikasi di-deploy di Streamlit Cloud / Hugging Face: "
+                   "pastikan requirements.txt ada di root repository, lalu reboot app.")
     if not st.session_state.meta.get("paket"):
         st.caption("*Isi **Identitas Dokumen RAB** di atas agar kop dokumen terisi lengkap.*")
 
