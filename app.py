@@ -1675,8 +1675,9 @@ if st.session_state.rekap_proyek:
                                file_name=f"{nama_file}.xlsx",
                                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                                **LEBAR_PENUH)
-        except ImportError:
-            st.warning("Paket `openpyxl` belum terpasang. Jalankan: `pip install openpyxl`")
+        except ImportError as e:
+            st.warning(f"Paket `{e.name}` belum terpasang. Jalankan: "
+                       f"`python -m pip install {e.name}`")
         except Exception as e:
             st.error(f"Gagal menyusun Excel: {e}")
 
@@ -1687,8 +1688,9 @@ if st.session_state.rekap_proyek:
             st.download_button("📄 Download PDF (.pdf)", data=data_pdf,
                                file_name=f"{nama_file}.pdf", mime="application/pdf",
                                **LEBAR_PENUH)
-        except ImportError:
-            st.warning("Paket `reportlab` belum terpasang. Jalankan: `pip install reportlab`")
+        except ImportError as e:
+            st.warning(f"Paket `{e.name}` belum terpasang. Jalankan: "
+                       f"`python -m pip install {e.name}`")
         except Exception as e:
             st.error(f"Gagal menyusun PDF: {e}")
 
